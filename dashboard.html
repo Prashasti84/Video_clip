@@ -2197,7 +2197,8 @@
   async function pingBackend() {
     try {
       const r = await apiFetch(`${API_BASE}/jobs`, { signal: AbortSignal.timeout(3000) });
-      useRealBackend = r.ok;
+      // A static host (Vercel without VIDEO_CLIP_API_URL) answers every path with the page itself — only a job list counts.
+      useRealBackend = r.ok && Array.isArray(await r.json().catch(() => null));
     } catch { useRealBackend = false; }
     if (useRealBackend && !everLive) {
       everLive = true;
