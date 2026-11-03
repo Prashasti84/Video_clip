@@ -105,13 +105,13 @@ Serves `dashboard.html` at `http://localhost:3737` (`PORT` to change).
 | `POST /jobs` | `{ uploadId }` or `{ sourceUrl: "https://…" }` plus the job settings above. Server file paths are refused unless `ALLOW_LOCAL_PATHS=1`. |
 | `GET /jobs/:id`, `GET /jobs`, `POST /jobs/:id/stop`, `DELETE /jobs/:id` | Poll / list / stop / delete. |
 | `POST /jobs/:id/retry` | Run a failed / stopped job again, keeping its clips. 409 with a reason if it can't. |
-| `GET /config` | `{ maxUploadBytes }` — the dashboard checks file size against it before uploading. |
+| `GET /config` | `{ maxUploadBytes, mediaKey? }` — the dashboard checks file size against it before uploading; `mediaKey` (only with `APP_PASSWORD`) opens clip files via `?key=`. |
 
 Jobs and their Activity logs are kept in `temp/jobs/`; on start the server resumes any job the last shutdown interrupted. Ctrl+C saves state before exiting. The dashboard re-lists the org's jobs from the server after a page reload, shows **Reconnecting…** while the server is unreachable (and won't silently fall back to demo jobs), and offers **Retry** / **Resume** on failed / stopped jobs.
 
 ## Deploying (Railway / Render / Fly.io)
 
-Not Vercel — serverless functions can't run ffmpeg / yt-dlp, multi-minute jobs or multi-GB uploads. The `Dockerfile` builds one image with Node 22, ffmpeg and yt-dlp and runs `node dist/server.js` (dashboard + API on one URL).
+The server can't run on Vercel — serverless functions can't run ffmpeg / yt-dlp, multi-minute jobs or multi-GB uploads. The `Dockerfile` builds one image with Node 22, ffmpeg and yt-dlp and runs `node dist/server.js` (dashboard + API on one URL).
 
 1. Push the repo to GitHub (`.env`, `temp/`, `node_modules/` are git- and docker-ignored).
 2. Railway → **New Project → Deploy from GitHub repo**. The Dockerfile is picked up automatically.
@@ -120,6 +120,14 @@ Not Vercel — serverless functions can't run ffmpeg / yt-dlp, multi-minute jobs
 5. **Settings → Networking → Generate Domain**. Open it; the browser asks for the password once (any username).
 
 YouTube often blocks cloud IPs ("Sign in to confirm you're not a bot"); uploads are unaffected.
+
+### Dashboard on Vercel (optional)
+
+The server above is still required — Vercel only hosts the dashboard page. `vercel.json` skips `npm install` / `tsc` and runs `vercel-build.js`, which writes `public/index.html` from `dashboard.html`.
+
+1. Vercel → import the repo. Leave Framework Preset, Build Command and Output Directory on their defaults (`vercel.json` sets them).
+2. **Environment Variables**: `VIDEO_CLIP_API_URL` = the server's https URL (e.g. `https://video-clip.up.railway.app`). Unset → demo mode.
+3. Redeploy. The dashboard asks for `APP_PASSWORD` once (kept in the browser) and sends it as `Authorization: Bearer …`; `<video>` / `<img>` tags load clips with `?key=` — a key derived from the password that opens `/clips-out/` files only (`GET /config` → `mediaKey`).
 
 ## Wiring into the NestJS backend (when ready)
 

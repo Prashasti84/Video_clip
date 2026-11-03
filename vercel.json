@@ -1,0 +1,6 @@
+{
+  "framework": null,
+  "installCommand": "echo \"no dependencies needed for the static dashboard\"",
+  "buildCommand": "node vercel-build.js",
+  "outputDirectory": "public"
+}

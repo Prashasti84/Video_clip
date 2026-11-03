@@ -1547,11 +1547,45 @@
   'use strict';
 
   // ── Config ────────────────────────────────────────────
-  // Served by server.ts → same origin (any PORT); opened as a file → the default local server.
-  const API_BASE = /^https?:$/.test(location.protocol) ? location.origin : 'http://localhost:3737';
+  // Served by server.ts → same origin (any PORT); opened as a file → the default local server;
+  // hosted on another site (Vercel) → window.VIDEO_CLIP_API, written into the page by vercel-build.js.
+  const API_BASE = window.VIDEO_CLIP_API
+    || (/^https?:$/.test(location.protocol) ? location.origin : 'http://localhost:3737');
   let useRealBackend = false; // true while the server answers pings
   let everLive = false;       // reached the server at least once — a failed ping now means "reconnecting", not demo mode
   let maxUploadBytes = 4 * 1024 ** 3; // replaced by the server's limit (GET /config)
+  let mediaKey = '';                  // opens clip files for <video> / <img> on a password-protected server (GET /config)
+
+  // ── Server password ───────────────────────────────────
+  // Same site as the server, the browser's own password prompt covers every request. From another site
+  // (Vercel) the server answers 401 instead: ask here, remember it, and send it as a Bearer header.
+  const PASSWORD_KEY = 'videoClip.password';
+  let password = '';
+  try { password = localStorage.getItem(PASSWORD_KEY) || ''; } catch { /* storage blocked — ask each visit */ }
+  let passwordDeclined = false;
+
+  function authHeaders() {
+    return password ? { Authorization: 'Bearer ' + encodeURIComponent(password) } : {};
+  }
+
+  async function apiFetch(url, opts = {}) {
+    // A timeout signal can run out while the prompt is open — the retry goes without it rather than failing at once.
+    const send = () => fetch(url, {
+      ...opts, ...(opts.signal?.aborted ? { signal: undefined } : {}),
+      headers: { ...(opts.headers || {}), ...authHeaders() },
+    });
+    const tried = password;
+    let r = await send();
+    if (r.status !== 401 || passwordDeclined) return r;
+    // Several requests can fail at once — only the first asks; the rest retry with what it got.
+    if (password === tried) {
+      const entered = prompt(tried ? 'Wrong password — try again:' : 'This server needs a password:');
+      if (entered === null) { passwordDeclined = true; return r; }
+      password = entered;
+      try { localStorage.setItem(PASSWORD_KEY, password); } catch { /* kept for this visit only */ }
+    }
+    return send();
+  }
 
   // ── State ─────────────────────────────────────────────
   let jobs   = [];
@@ -1716,7 +1750,7 @@
     if (!upload) return;
     if (upload.xhr) upload.xhr.abort();
     // A job already started from this upload keeps its own copy on the server.
-    if (upload.uploadId) fetch(`${API_BASE}/uploads/${upload.uploadId}`, { method: 'DELETE' }).catch(() => {});
+    if (upload.uploadId) apiFetch(`${API_BASE}/uploads/${upload.uploadId}`, { method: 'DELETE' }).catch(() => {});
     upload = null;
     fileInput.value = '';
     renderUpload();
@@ -1742,6 +1776,7 @@
     xhr.open('POST', `${API_BASE}/uploads`);
     xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name));
     xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+    for (const [k, v] of Object.entries(authHeaders())) xhr.setRequestHeader(k, v);
     xhr.upload.onprogress = e => {
       if (upload !== current || !e.lengthComputable) return;
       current.pct = e.loaded / e.total * 100;
@@ -2161,12 +2196,12 @@
   // ── Backend ping ──────────────────────────────────────
   async function pingBackend() {
     try {
-      const r = await fetch(`${API_BASE}/jobs`, { signal: AbortSignal.timeout(3000) });
+      const r = await apiFetch(`${API_BASE}/jobs`, { signal: AbortSignal.timeout(3000) });
       useRealBackend = r.ok;
     } catch { useRealBackend = false; }
     if (useRealBackend && !everLive) {
       everLive = true;
-      loadServerConfig();
+      await loadServerConfig(); // first: restored clips need its mediaKey
       restoreJobs();
     }
     updateServerBadge();
@@ -2188,11 +2223,12 @@
 
   async function loadServerConfig() {
     try {
-      const cfg = await (await fetch(`${API_BASE}/config`)).json();
+      const cfg = await (await apiFetch(`${API_BASE}/config`)).json();
       if (cfg.maxUploadBytes > 0) {
         maxUploadBytes = cfg.maxUploadBytes;
         document.getElementById('dzSub').textContent = `mp4 · mov · mkv · webm — up to ${fmtLimit(maxUploadBytes)}`;
       }
+      if (cfg.mediaKey) mediaKey = cfg.mediaKey;
     } catch { /* older server — keep the default */ }
   }
 
@@ -2200,7 +2236,7 @@
   async function restoreJobs() {
     const orgId = document.getElementById('orgId').value.trim() || 'demo-org';
     try {
-      const r = await fetch(`${API_BASE}/jobs?orgId=${encodeURIComponent(orgId)}`);
+      const r = await apiFetch(`${API_BASE}/jobs?orgId=${encodeURIComponent(orgId)}`);
       if (!r.ok) return;
       const known = new Set(jobs.map(j => j.id));
       const added = (await r.json())
@@ -2285,7 +2321,7 @@
           body.uploadId   = upload.uploadId;
           body.sourceName = sourceName;
         }
-        const r   = await fetch(`${API_BASE}/jobs`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+        const r   = await apiFetch(`${API_BASE}/jobs`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
         const { jobId, error } = await r.json();
         if (!jobId) throw new Error(error ?? 'no jobId returned');
         const job = {
@@ -2364,7 +2400,7 @@
   // One poll. Returns true when there is nothing more to poll for.
   async function pollJob(job) {
     let r;
-    try { r = await fetch(`${API_BASE}/jobs/${job.id}`); }
+    try { r = await apiFetch(`${API_BASE}/jobs/${job.id}`); }
     catch { return false; } // server unreachable — it may be restarting; keep trying
     if (r.status === 404) {
       job._gone = true;
@@ -2428,7 +2464,7 @@
     job._retrying = true;
     renderJob(job);
     try {
-      const r    = await fetch(`${API_BASE}/jobs/${id}/retry`, { method: 'POST' });
+      const r    = await apiFetch(`${API_BASE}/jobs/${id}/retry`, { method: 'POST' });
       const data = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
       job.status       = 'queued';
@@ -2456,7 +2492,7 @@
     if (!job) return;
     if (['done','failed','stopped'].includes(job.status)) return;
     if (job._real) {
-      fetch(`${API_BASE}/jobs/${id}/stop`, { method: 'POST' }).catch(() => {});
+      apiFetch(`${API_BASE}/jobs/${id}/stop`, { method: 'POST' }).catch(() => {});
     }
     const iv = activePolls.get(id);
     if (iv) { clearInterval(iv); activePolls.delete(id); }
@@ -2469,7 +2505,7 @@
 
   function deleteJob(id) {
     const job = jobs.find(j => j.id === id);
-    if (job?._real) fetch(`${API_BASE}/jobs/${id}`, { method: 'DELETE' }).catch(() => {});
+    if (job?._real) apiFetch(`${API_BASE}/jobs/${id}`, { method: 'DELETE' }).catch(() => {});
     const iv = activePolls.get(id);
     if (iv) { clearInterval(iv); activePolls.delete(id); }
     jobs = jobs.filter(j => j.id !== id);
@@ -2590,7 +2626,7 @@
       try { seg = decodeURIComponent(seg); } catch { /* already raw */ }
       return encodeURIComponent(seg);
     }).join('/');
-    return API_BASE + '/' + path;
+    return API_BASE + '/' + path + (mediaKey ? '?key=' + mediaKey : '');
   }
 
   function fileName(p) {

@@ -35,21 +35,36 @@ if (!APP_PASSWORD && process.env.NODE_ENV === 'production') {
   process.exit(1);
 }
 
-// HTTP Basic auth: the browser asks once and sends it with every request (fetch, uploads, <video>). Any username works.
+/** Opens clip files only (?key=…), for <video> / <img> tags that can't send headers. Derived, so a shared clip link never reveals the password. */
+const MEDIA_KEY = APP_PASSWORD ? crypto.createHmac('sha256', APP_PASSWORD).update('clips-out').digest('hex') : '';
+
+// Before the password check, so cross-site preflights (dashboard hosted on Vercel) are answered.
+app.use(cors());
+
+// Same-site dashboard: HTTP Basic auth — the browser asks once and sends it with every request; any username works.
+// Dashboard on another site: it sends `Authorization: Bearer <URI-encoded password>` itself.
 if (APP_PASSWORD) {
-  const expected = crypto.createHash('sha256').update(APP_PASSWORD).digest();
+  const digest = (s: string) => crypto.createHash('sha256').update(s).digest();
+  // Hashing both sides gives equal-length buffers, so the comparison is constant-time.
+  const matches = (given: string, secret: string) => crypto.timingSafeEqual(digest(given), digest(secret));
   app.use((req: Request, res: Response, next) => {
-    const [scheme, encoded] = String(req.get('authorization') ?? '').split(' ');
-    const given = scheme === 'Basic' && encoded
-      ? Buffer.from(encoded, 'base64').toString().split(':').slice(1).join(':')
-      : '';
-    // Hashing both sides gives equal-length buffers, so the comparison is constant-time.
-    if (crypto.timingSafeEqual(crypto.createHash('sha256').update(given).digest(), expected)) return next();
-    res.set('WWW-Authenticate', 'Basic realm="Video Clip", charset="UTF-8"').status(401).send('Password required');
+    const auth = String(req.get('authorization') ?? '');
+    const sp = auth.indexOf(' ');
+    const scheme = sp < 0 ? auth : auth.slice(0, sp);
+    const value = sp < 0 ? '' : auth.slice(sp + 1);
+    let given = '';
+    try {
+      if (scheme === 'Basic') given = Buffer.from(value, 'base64').toString().split(':').slice(1).join(':');
+      if (scheme === 'Bearer') given = decodeURIComponent(value);
+    } catch { /* malformed — stays '' */ }
+    if (matches(given, APP_PASSWORD)) return next();
+    if (req.method === 'GET' && req.path.startsWith('/clips-out/') && matches(String(req.query.key ?? ''), MEDIA_KEY)) return next();
+    // No Basic challenge for a Bearer caller, so a cross-site dashboard asks in its own prompt rather than the browser's.
+    if (scheme !== 'Bearer') res.set('WWW-Authenticate', 'Basic realm="Video Clip", charset="UTF-8"');
+    res.status(401).json({ error: 'Password required' });
   });
 }
 
-app.use(cors());
 app.use(express.json());
 
 // Serve generated clip files directly
@@ -385,9 +400,9 @@ app.post('/jobs/:id/retry', async (req: Request, res: Response) => {
   }
 });
 
-// GET /config — limits the dashboard should enforce before uploading
+// GET /config — limits the dashboard should enforce before uploading, and the clip-file key
 app.get('/config', (_req: Request, res: Response) => {
-  res.json({ maxUploadBytes: MAX_UPLOAD_BYTES });
+  res.json({ maxUploadBytes: MAX_UPLOAD_BYTES, ...(MEDIA_KEY ? { mediaKey: MEDIA_KEY } : {}) });
 });
 
 const resumed = clipService.resumeInterrupted();

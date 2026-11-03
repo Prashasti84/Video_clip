@@ -4,3 +4,4 @@ temp/
 .env
 .env.*
 *.log
+public/
