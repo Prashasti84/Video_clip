@@ -1,0 +1,3225 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gifmor Clip Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+  /* === TOKENS ===
+     Gifmor brand: lime on zinc-black. Layout: top bar, full-height job sidebar + clip library; stacks on narrow screens */
+  :root {
+    --bg:            #09090B;
+    --surface:       #0F0F12;
+    --surface-2:     #16161B;
+    --surface-3:     #1E1E24;
+    --track:         #09090B;
+    --track-on:      #24242C;
+    --track-on-ring: inset 0 0 0 1px #33333D;
+    --border:        #24242C;
+    --border-strong: #34343E;
+    --fg:            #F5F7FA;
+    --fg-muted:      #A1A1AA;
+    --fg-dim:        #6B6B76;
+    --accent:        #B6FF2E;
+    --accent-hover:  #C8FF5C;
+    --accent-ink:    #0B0F02;
+    --accent-text:   #B6FF2E;
+    --accent-line:   #B6FF2E;
+    --accent-soft:   rgba(182,255,46,0.09);
+    --accent-ring:   rgba(182,255,46,0.55);
+    --warn:          #FBBF24;
+    --warn-soft:     rgba(251,191,36,0.10);
+    --error:         #F87171;
+    --error-soft:    rgba(248,113,113,0.10);
+    --thumb-bg:      #141418;
+    --thumb-ring:    rgba(255,255,255,0.07);
+    --shadow-pop:    0 18px 48px rgba(0,0,0,0.55);
+    --sans:          'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono:          'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --top-h:         52px;
+    --side-w:        368px;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg:            #F6F6F7;
+      --surface:       #FFFFFF;
+      --surface-2:     #F4F4F5;
+      --surface-3:     #E9E9EC;
+      --track:         #F0F0F2;
+      --track-on:      #FFFFFF;
+      --track-on-ring: 0 1px 2px rgba(9,9,11,0.10), inset 0 0 0 1px rgba(9,9,11,0.06);
+      --border:        #E4E4E7;
+      --border-strong: #D4D4D8;
+      --fg:            #09090B;
+      --fg-muted:      #52525B;
+      --fg-dim:        #8A8A93;
+      --accent:        #B6FF2E;
+      --accent-hover:  #A8F21C;
+      --accent-ink:    #0B0F02;
+      --accent-text:   #3F6212;
+      --accent-line:   #65A30D;
+      --accent-soft:   rgba(101,163,13,0.10);
+      --accent-ring:   rgba(101,163,13,0.55);
+      --warn:          #B45309;
+      --warn-soft:     rgba(217,119,6,0.10);
+      --error:         #DC2626;
+      --error-soft:    rgba(220,38,38,0.08);
+      --thumb-bg:      #E4E4E7;
+      --thumb-ring:    rgba(9,9,11,0.08);
+      --shadow-pop:    0 18px 48px rgba(9,9,11,0.18);
+      color-scheme: light;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:            #F6F6F7;
+    --surface:       #FFFFFF;
+    --surface-2:     #F4F4F5;
+    --surface-3:     #E9E9EC;
+    --track:         #F0F0F2;
+    --track-on:      #FFFFFF;
+    --track-on-ring: 0 1px 2px rgba(9,9,11,0.10), inset 0 0 0 1px rgba(9,9,11,0.06);
+    --border:        #E4E4E7;
+    --border-strong: #D4D4D8;
+    --fg:            #09090B;
+    --fg-muted:      #52525B;
+    --fg-dim:        #8A8A93;
+    --accent:        #B6FF2E;
+    --accent-hover:  #A8F21C;
+    --accent-ink:    #0B0F02;
+    --accent-text:   #3F6212;
+    --accent-line:   #65A30D;
+    --accent-soft:   rgba(101,163,13,0.10);
+    --accent-ring:   rgba(101,163,13,0.55);
+    --warn:          #B45309;
+    --warn-soft:     rgba(217,119,6,0.10);
+    --error:         #DC2626;
+    --error-soft:    rgba(220,38,38,0.08);
+    --thumb-bg:      #E4E4E7;
+    --thumb-ring:    rgba(9,9,11,0.08);
+    --shadow-pop:    0 18px 48px rgba(9,9,11,0.18);
+    color-scheme: light;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+  [hidden] { display: none !important }
+  button, input, textarea, select { font: inherit; color: inherit }
+  button { cursor: pointer }
+  :focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 2px }
+  ::selection { background: rgba(182,255,46,0.3) }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .ico {
+    width: 16px; height: 16px;
+    fill: none; stroke: currentColor; stroke-width: 1.7;
+    stroke-linecap: round; stroke-linejoin: round;
+    flex-shrink: 0;
+  }
+  .ico.fill { fill: currentColor; stroke: none }
+  .mono { font-family: var(--mono) }
+
+  /* ── Top bar ────────────────────────────────────────── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: var(--top-h);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 max(20px, env(safe-area-inset-right, 0px)) 0 max(20px, env(safe-area-inset-left, 0px));
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; white-space: nowrap }
+  .brand-mark { width: 17px; height: 19px; color: var(--accent-line); flex-shrink: 0 }
+  .brand-mark path { fill: currentColor }
+  .brand-name { font-size: 15px; font-weight: 700; letter-spacing: -0.1px }
+  .brand-div  { width: 1px; height: 16px; background: var(--border-strong) }
+  .brand-sub  { font-size: 14px; font-weight: 500; color: var(--fg-muted) }
+
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px }
+  .server-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    color: var(--fg-muted);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: default;
+  }
+  .server-pill .dot { width: 6px; height: 6px; border-radius: 50% }
+  .server-pill.live .dot { background: var(--accent-line); animation: pulse 2s ease-in-out infinite }
+  .server-pill.demo .dot { background: var(--warn) }
+  .server-pill.offline { color: var(--error) }
+  .server-pill.offline .dot { background: var(--error); animation: pulse 1s ease-in-out infinite }
+
+  .icon-btn {
+    width: 30px; height: 30px;
+    display: grid; place-items: center;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--fg-muted);
+    text-decoration: none;
+    transition: color .12s, background .12s, border-color .12s;
+    flex-shrink: 0;
+  }
+  .icon-btn:not(:disabled):hover { color: var(--fg); background: var(--surface-2) }
+  .icon-btn.bordered { border-color: var(--border) }
+  .icon-btn.danger:not(:disabled):hover { color: var(--error); background: var(--error-soft) }
+  .icon-btn:disabled { opacity: .35; cursor: not-allowed }
+
+  /* ── Shell ──────────────────────────────────────────── */
+  .shell {
+    display: grid;
+    grid-template-columns: var(--side-w) minmax(0, 1fr);
+    align-items: start;
+    min-height: calc(100vh - var(--top-h));
+  }
+  .panel { min-width: 0 }
+
+  /* ── Create sidebar ─────────────────────────────────── */
+  .create-panel {
+    position: sticky;
+    top: var(--top-h);
+    height: calc(100vh - var(--top-h));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+  }
+  .create-head { padding: 18px 20px 4px }
+  .create-head h2 { font-size: 15px; font-weight: 650 }
+  .create-head p  { font-size: 12.5px; color: var(--fg-muted); margin-top: 2px; line-height: 1.45 }
+
+  .step {
+    padding: 16px 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .step + .step { border-top: 1px solid var(--border) }
+  .step-head h3 { font-size: 12px; font-weight: 600; color: var(--fg); letter-spacing: 0.1px }
+
+  .field { display: flex; flex-direction: column; gap: 6px; min-width: 0 }
+  .field-label { font-size: 12px; font-weight: 500; color: var(--fg-muted) }
+  .field-hint  { font-size: 11.5px; color: var(--fg-dim); line-height: 1.45 }
+
+  .input {
+    width: 100%;
+    height: 32px;
+    background: var(--track);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    padding: 0 10px;
+    outline: none;
+    transition: border-color .12s, box-shadow .12s;
+  }
+  .input:focus { border-color: var(--accent-line); box-shadow: 0 0 0 3px var(--accent-soft) }
+  .input::placeholder, textarea::placeholder { color: var(--fg-dim) }
+  input[type="number"].input { font-family: var(--mono); font-size: 12.5px }
+
+  /* Segmented controls (source tabs + radios share the look) */
+  .src-tabs, .seg {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 2px;
+    padding: 2px;
+    background: var(--track);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+  }
+  .src-tab, .seg-opt span {
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 6px;
+    border: none;
+    border-radius: 5px;
+    background: none;
+    color: var(--fg-muted);
+    font-size: 12.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color .12s, background .12s;
+  }
+  .src-tab:hover, .seg-opt:hover span { color: var(--fg) }
+  .src-tab.active, .seg-opt input:checked + span {
+    background: var(--track-on);
+    color: var(--fg);
+    box-shadow: var(--track-on-ring);
+  }
+  .src-tab .ico { width: 14px; height: 14px }
+  .seg-opt { position: relative; display: block; cursor: pointer; min-width: 0 }
+  .seg-opt input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer }
+  .seg-opt input:focus-visible + span { outline: 2px solid var(--accent-ring); outline-offset: 1px }
+  .ratio { display: inline-block; border: 1.4px solid currentColor; border-radius: 2px; opacity: .75 }
+  .ratio.r169 { width: 14px; height: 8px }
+  .ratio.r916 { width: 8px;  height: 13px }
+  .ratio.r11  { width: 11px; height: 11px }
+  .seg-count { grid-template-columns: 1fr 1fr 1fr 1.4fr; grid-auto-flow: row }
+  .custom-count { display: flex; align-items: center; gap: 10px }
+  .custom-count .input { width: 84px }
+  .settings-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 12px }
+
+  /* URL */
+  .input-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 36px;
+    padding: 0 3px 0 2px;
+    background: var(--track);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    transition: border-color .12s, box-shadow .12s;
+  }
+  .input-group:focus-within { border-color: var(--accent-line); box-shadow: 0 0 0 3px var(--accent-soft) }
+  .input-group input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: none;
+    background: none;
+    outline: none;
+    padding: 0 4px;
+    font-size: 12.5px;
+    font-family: var(--mono);
+  }
+  .url-kind { display: grid; place-items: center; width: 28px; flex-shrink: 0; color: var(--fg-dim) }
+  .url-kind .ico { width: 16px; height: 16px }
+  .btn-paste {
+    height: 28px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--surface-2);
+    color: var(--fg);
+    font-size: 12px;
+    font-weight: 500;
+    flex-shrink: 0;
+    transition: background .12s;
+  }
+  .btn-paste:hover { background: var(--surface-3) }
+
+  /* Upload */
+  .dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 20px 16px;
+    border: 1px dashed var(--border-strong);
+    border-radius: 7px;
+    background: var(--track);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .12s, background .12s;
+  }
+  .dropzone:hover, .dropzone.drag { border-color: var(--accent-line); background: var(--accent-soft) }
+  .dz-icon { color: var(--fg-muted); margin-bottom: 4px }
+  .dz-icon .ico { width: 20px; height: 20px }
+  .dz-title { font-size: 13px; font-weight: 500 }
+  .dz-title u { color: var(--accent-text); text-underline-offset: 3px }
+  .dz-sub { font-size: 11px; color: var(--fg-dim); font-family: var(--mono) }
+  .file-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 6px 10px 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--track);
+  }
+  .file-card.error { border-color: color-mix(in srgb, var(--error) 50%, transparent) }
+  .file-thumb {
+    width: 34px; height: 34px;
+    border-radius: 6px;
+    display: grid; place-items: center;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--fg-muted);
+    flex-shrink: 0;
+  }
+  .file-meta { flex: 1; min-width: 0 }
+  .file-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+  .file-sub  { font-size: 11px; color: var(--fg-muted); font-family: var(--mono) }
+  .file-card.ready .file-sub { color: var(--accent-text) }
+  .file-card.error .file-sub { color: var(--error) }
+  .file-card .progress-track { margin-top: 7px }
+  .file-card.error .progress-fill { background: var(--error) }
+
+  /* Prompt */
+  .textarea-wrap {
+    background: var(--track);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    transition: border-color .12s, box-shadow .12s;
+  }
+  .textarea-wrap:focus-within { border-color: var(--accent-line); box-shadow: 0 0 0 3px var(--accent-soft) }
+  .textarea-wrap textarea {
+    display: block;
+    width: 100%;
+    min-height: 84px;
+    resize: vertical;
+    border: none;
+    background: none;
+    outline: none;
+    padding: 10px 12px 4px;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  .textarea-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 2px 8px 6px 6px;
+  }
+  .char-count { font-family: var(--mono); font-size: 11px; color: var(--fg-dim) }
+  .ai-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 26px;
+    padding: 0 8px;
+    border-radius: 5px;
+    border: none;
+    background: none;
+    color: var(--fg-muted);
+    font-size: 12px;
+    font-weight: 500;
+    transition: color .12s, background .12s;
+  }
+  .ai-btn:hover, .ai-btn[aria-expanded="true"] { color: var(--fg); background: var(--surface-2) }
+  .ai-btn .ico { width: 13px; height: 13px; transition: transform .15s }
+  .ai-btn[aria-expanded="true"] .ico { transform: rotate(180deg) }
+  .idea-chips { display: flex; flex-wrap: wrap; gap: 6px }
+  .idea-chip {
+    height: 26px;
+    padding: 0 9px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--fg-muted);
+    font-size: 12px;
+    transition: color .12s, border-color .12s, background .12s;
+  }
+  .idea-chip:hover { color: var(--fg); border-color: var(--border-strong); background: var(--surface-2) }
+
+  /* Advanced */
+  .adv { border-top: 1px dashed var(--border); margin-top: 2px; padding-top: 2px }
+  .adv-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    background: none;
+    border: none;
+    color: var(--fg-muted);
+    font-size: 12.5px;
+    font-weight: 500;
+    text-align: left;
+  }
+  .adv-toggle:hover { color: var(--fg) }
+  .adv-toggle .chev { margin-left: auto; transition: transform .15s }
+  .adv-toggle.open .chev { transform: rotate(180deg) }
+  .adv-fields { display: flex; flex-direction: column; gap: 12px; padding: 4px 0 4px }
+  .check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .check-row input {
+    width: 15px; height: 15px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    accent-color: var(--accent-line);
+    cursor: pointer;
+  }
+
+  /* Generate (pinned to the bottom of the sidebar) */
+  .generate {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    padding: 14px 20px max(16px, env(safe-area-inset-bottom, 0px));
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    z-index: 2;
+  }
+  .btn-generate {
+    width: 100%;
+    height: 40px;
+    border: none;
+    border-radius: 7px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 14px;
+    font-weight: 650;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background .12s, transform .12s;
+  }
+  .btn-generate:hover  { background: var(--accent-hover) }
+  .btn-generate:active { transform: scale(.99) }
+  .btn-generate:disabled { opacity: .6; cursor: not-allowed; transform: none }
+  .btn-generate .ico { width: 16px; height: 16px; stroke-width: 2 }
+  .kbd {
+    font: 500 10.5px var(--mono);
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: rgba(11,15,2,0.12);
+    color: rgba(11,15,2,0.62);
+    margin-left: 2px;
+  }
+  .gen-note {
+    margin-top: 9px;
+    font-size: 11.5px;
+    color: var(--fg-dim);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* ── Spinner ────────────────────────────────────────── */
+  @keyframes spin { to { transform: rotate(360deg) } }
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(11,15,2,0.22);
+    border-top-color: var(--accent-ink);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    display: none;
+  }
+  .running .spinner { display: block }
+  .running .play-icon { display: none }
+
+  /* ── Main column ────────────────────────────────────── */
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    min-width: 0;
+    padding: 8px max(28px, env(safe-area-inset-right, 0px)) 56px 28px;
+  }
+
+  /* Library header */
+  .clips-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    column-gap: 28px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .clips-title { display: flex; align-items: baseline; gap: 10px; padding: 14px 0 11px }
+  .clips-title h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.2px }
+  .count-chip {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--fg-dim);
+    white-space: nowrap;
+  }
+  .count-chip.running { color: var(--accent-text) }
+  .filter-tabs { display: flex; gap: 22px; overflow-x: auto; max-width: 100%; scrollbar-width: none }
+  .filter-tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 44px;
+    padding: 0 1px;
+    border: none;
+    background: none;
+    color: var(--fg-muted);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color .12s;
+  }
+  .filter-tab:hover { color: var(--fg) }
+  .filter-tab .n { font-family: var(--mono); font-size: 11px; color: var(--fg-dim) }
+  .filter-tab.active { color: var(--fg) }
+  .filter-tab.active::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: -1px;
+    height: 2px;
+    border-radius: 2px 2px 0 0;
+    background: var(--accent-line);
+  }
+  .bulk { display: flex; align-items: center; gap: 6px; margin-left: auto; padding-bottom: 8px }
+  .select-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 30px;
+    padding: 0 8px;
+    font-size: 12.5px;
+    color: var(--fg-muted);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .select-all input { width: 15px; height: 15px; accent-color: var(--accent-line); cursor: pointer }
+  .select-all:hover { color: var(--fg) }
+
+  .btn {
+    height: 30px;
+    padding: 0 11px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    font-size: 12.5px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .12s, border-color .12s, color .12s, opacity .12s;
+  }
+  .btn .ico { width: 14px; height: 14px }
+  .btn-outline { background: transparent; border-color: var(--border-strong); color: var(--fg) }
+  .btn-outline:not(:disabled):hover { background: var(--surface-2) }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); font-weight: 600 }
+  .btn-primary:not(:disabled):hover { background: var(--accent-hover) }
+  .btn:disabled { opacity: .4; cursor: not-allowed }
+  .btn-text {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--fg-muted);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .btn-text:hover { color: var(--fg) }
+  .btn-text .ico { width: 13px; height: 13px }
+
+  /* ── Clip grid ──────────────────────────────────────── */
+  .clip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 248px), 1fr));
+    gap: 28px 18px;
+  }
+  .clip-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .clip-thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--thumb-bg);
+    cursor: pointer;
+  }
+  .clip-thumb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px var(--thumb-ring);
+    pointer-events: none;
+    transition: box-shadow .12s;
+  }
+  .clip-card:hover .clip-thumb::after { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 22%, transparent) }
+  .clip-card.selected .clip-thumb::after { box-shadow: inset 0 0 0 2px var(--accent-line) }
+  .clip-thumb:focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 2px }
+  .clip-thumb-canvas,
+  .clip-thumb-img,
+  .clip-hover-media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  /* Vertical and square clips are letterboxed, not cropped, so the preview matches the file. */
+  .clip-card:not([data-ar="16:9"]) .clip-thumb-img,
+  .clip-card:not([data-ar="16:9"]) .clip-hover-media { object-fit: contain; background: #000 }
+  .clip-hover-media { background: #000; opacity: 0; transition: opacity .15s; pointer-events: none }
+  .clip-card.hovering .clip-hover-media.ready { opacity: 1 }
+  .thumb-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(0,0,0,.5) 0%, transparent 38%);
+    pointer-events: none;
+  }
+  .badge-time, .clip-best {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    border-radius: 4px;
+    font-size: 11px;
+    line-height: 1;
+    padding: 4px 6px;
+  }
+  .badge-time {
+    right: 8px; bottom: 8px;
+    font-family: var(--mono);
+    font-weight: 500;
+    color: #fff;
+    background: rgba(0,0,0,.72);
+  }
+  .clip-best {
+    right: 8px; top: 8px;
+    font-weight: 600;
+    color: #FCD34D;
+    background: rgba(0,0,0,.72);
+  }
+  .play-btn {
+    position: absolute;
+    left: 50%; top: 50%;
+    z-index: 3;
+    width: 40px; height: 40px;
+    transform: translate(-50%, -50%) scale(.92);
+    border-radius: 50%;
+    background: rgba(0,0,0,.6);
+    display: grid; place-items: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .15s, transform .15s;
+  }
+  .play-btn svg { width: 12px; height: 12px; fill: #fff; margin-left: 2px }
+  .clip-card:hover .play-btn { opacity: 1; transform: translate(-50%, -50%) }
+  .clip-card.has-media.hovering .play-btn { opacity: 0 }
+
+  .clip-check {
+    position: absolute;
+    top: 8px; left: 8px;
+    z-index: 6;
+    width: 22px; height: 22px;
+    transition: opacity .12s;
+  }
+  @media (hover: hover) {
+    .clip-check { opacity: 0 }
+    .clip-card:hover .clip-check,
+    .clip-card:focus-within .clip-check,
+    .clip-card.selected .clip-check,
+    .clip-grid.has-selection .clip-check { opacity: 1 }
+  }
+  .clip-check input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer }
+  .check-box {
+    width: 22px; height: 22px;
+    border-radius: 5px;
+    border: 1.5px solid rgba(255,255,255,.85);
+    background: rgba(0,0,0,.4);
+    display: grid; place-items: center;
+    pointer-events: none;
+    transition: background .12s, border-color .12s;
+  }
+  .check-box svg { width: 13px; height: 13px; stroke: var(--accent-ink); stroke-width: 3; fill: none; opacity: 0; transition: opacity .12s }
+  .clip-check input:checked + .check-box { background: var(--accent); border-color: var(--accent) }
+  .clip-check input:checked + .check-box svg { opacity: 1 }
+  .clip-check input:focus-visible + .check-box { outline: 2px solid #fff; outline-offset: 2px }
+
+  .clip-body { display: flex; align-items: flex-start; gap: 6px; min-width: 0 }
+  .clip-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px }
+  .clip-caption {
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+  .clip-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--fg-dim);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .clip-meta i { font-style: normal; opacity: .6 }
+  .score-pill {
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .score-pill.hi  { background: var(--accent-soft); color: var(--accent-text) }
+  .score-pill.mid { background: var(--surface-2);   color: var(--fg-muted) }
+  .score-pill.lo  { background: var(--warn-soft);   color: var(--warn) }
+  .clip-actions { display: flex; gap: 2px; margin: -3px -6px 0 0 }
+
+  /* Processing card */
+  .proc-thumb {
+    display: grid;
+    place-items: center;
+    cursor: default;
+    background: repeating-linear-gradient(135deg, var(--surface-2) 0 8px, var(--surface) 8px 16px);
+    background-size: 22.63px 22.63px;
+    animation: hatch 1.2s linear infinite;
+  }
+  @keyframes hatch { to { background-position: 22.63px 0 } }
+  .proc-ring {
+    --p: 0;
+    position: relative;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: conic-gradient(var(--accent-line) calc(var(--p) * 1%), var(--border-strong) 0);
+    display: grid; place-items: center;
+  }
+  .proc-ring::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: var(--surface);
+  }
+  .proc-ring.spin { background: conic-gradient(var(--accent-line) 20%, var(--border-strong) 0); animation: spin 1s linear infinite }
+  .proc-ring.spin .proc-pct { animation: spin 1s linear infinite reverse }
+  .proc-pct { position: relative; font: 500 12px var(--mono) }
+  .processing .clip-caption { font-weight: 500; color: var(--fg-muted) }
+  .processing .progress-track { margin-top: 3px }
+
+  /* "Run again" tile */
+  .more-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 4px;
+    aspect-ratio: 16 / 9;
+    align-self: start;
+    padding: 16px 18px;
+    border: 1px dashed var(--border-strong);
+    border-radius: 8px;
+  }
+  .more-card h3 { font-size: 13.5px; font-weight: 600 }
+  .more-card p  { font-size: 12.5px; color: var(--fg-muted); line-height: 1.45; max-width: 240px }
+  .more-card .btn { margin-top: 8px }
+
+  /* Empty state */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 72px 20px 80px;
+    text-align: center;
+  }
+  .empty-art { width: 256px; max-width: 100%; height: auto; margin-bottom: 18px; overflow: visible }
+  .empty-art .wave { fill: var(--border-strong) }
+  .empty-art .cut  { fill: var(--accent-line) }
+  .empty-art .win  { fill: var(--accent-soft) }
+  .empty-state h3 { font-size: 16px; font-weight: 650 }
+  .empty-state p  { font-size: 13px; color: var(--fg-muted); max-width: 380px; line-height: 1.6 }
+  .empty-state .btn { margin-top: 12px }
+
+  /* ── Jobs ───────────────────────────────────────────── */
+  .panel-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 11px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-head h2 { font-size: 15px; font-weight: 650; margin-right: 2px }
+  .job-list { display: flex; flex-direction: column; gap: 10px }
+  .job-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .job-card.flash { border-color: var(--accent-line); box-shadow: 0 0 0 3px var(--accent-soft) }
+  .job-header { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px 10px }
+  .job-icon {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--fg-muted);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+  .job-meta { flex: 1; min-width: 0 }
+  .job-source {
+    font-size: 11.5px;
+    color: var(--fg-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: var(--mono);
+  }
+  .job-prompt { font-size: 14px; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; margin-top: 1px }
+  .job-prompt .neg { color: var(--fg-muted); font-weight: 400 }
+  .job-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px }
+  .chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.5;
+    padding: 0 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--fg-muted);
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 5px;
+    font-size: 11.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-transform: capitalize;
+    background: var(--surface-2);
+    color: var(--fg-muted);
+  }
+  .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor }
+  .status-downloading, .status-processing { color: var(--fg) }
+  .status-downloading::before, .status-processing::before { background: var(--accent-line); animation: pulse 1.2s ease-in-out infinite }
+  .status-done   { background: var(--accent-soft); color: var(--accent-text) }
+  .status-failed { background: var(--error-soft);  color: var(--error) }
+  .status-stopped { color: var(--fg-dim) }
+
+  .job-progress { padding: 2px 16px 10px; display: flex; align-items: center; gap: 12px }
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    background: var(--surface-3);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-track.sm { height: 3px }
+  .progress-fill {
+    height: 100%;
+    width: 0;
+    background: var(--accent-line);
+    border-radius: 99px;
+    transition: width .4s ease;
+  }
+  .progress-fill.failed { background: var(--error) }
+  .progress-label { font-size: 11.5px; color: var(--fg-muted); white-space: nowrap; font-family: var(--mono) }
+
+  .job-phase {
+    padding: 0 16px 10px;
+    font-size: 12.5px;
+    color: var(--fg-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .job-phase::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent-line);
+    flex-shrink: 0;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse { 50% { opacity: .3 } }
+  .job-notice {
+    margin: 0 16px 12px;
+    padding: 8px 11px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    background: var(--warn-soft);
+    border: 1px solid color-mix(in srgb, var(--warn) 30%, transparent);
+    overflow-wrap: anywhere;
+  }
+  .job-notice strong { color: var(--warn); font-weight: 600 }
+  .job-notice.error { background: var(--error-soft); border-color: color-mix(in srgb, var(--error) 30%, transparent) }
+  .job-notice.error strong { color: var(--error) }
+
+  /* Activity log */
+  .log-panel {
+    margin: 0 16px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .log-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    cursor: pointer;
+    list-style: none;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg-muted);
+    user-select: none;
+  }
+  .log-header::-webkit-details-marker { display: none }
+  .log-header:hover { color: var(--fg) }
+  .log-header .chev { width: 13px; height: 13px; transition: transform .15s }
+  .log-panel[open] .log-header .chev { transform: rotate(90deg) }
+  .log-last {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--fg-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .log-panel[open] .log-last { visibility: hidden }
+  .log-count { font-family: var(--mono); font-size: 11px; color: var(--fg-dim); white-space: nowrap }
+  .log-body {
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 8px 10px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--fg-muted);
+    overflow-wrap: anywhere;
+  }
+  .log-line { display: block }
+  .log-line.info  { color: var(--fg-muted) }
+  .log-line.ok    { color: var(--accent-text) }
+  .log-line.warn  { color: var(--warn) }
+  .log-line.error { color: var(--error) }
+  .log-line.dim   { color: var(--fg-dim) }
+
+  .job-actions {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-top: 1px solid var(--border);
+  }
+  .job-ready { margin-left: auto; font-size: 12px; color: var(--accent-text); font-family: var(--mono) }
+  .btn-sm {
+    font-size: 12px;
+    font-weight: 500;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: none;
+    color: var(--fg-muted);
+    transition: color .12s, background .12s, border-color .12s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-sm:hover { background: var(--surface-2); color: var(--fg) }
+  .btn-sm.danger:hover { color: var(--error); background: var(--error-soft) }
+  .btn-sm .ico { width: 13px; height: 13px }
+
+  /* ── Clip detail modal ──────────────────────────────── */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,.72);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 100%; max-width: 760px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    box-shadow: var(--shadow-pop);
+  }
+  .modal-thumb { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; overflow: hidden }
+  .modal-thumb canvas { width: 100%; height: 100%; display: block }
+  .modal-thumb-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center }
+  .modal-play-btn {
+    width: 52px; height: 52px;
+    background: rgba(0,0,0,.6);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-play-btn svg { width: 18px; height: 18px; fill: #fff; margin-left: 3px }
+  .modal-path {
+    position: absolute; bottom: 10px; left: 12px;
+    font-family: var(--mono); font-size: 10.5px;
+    color: rgba(255,255,255,.75);
+    background: rgba(0,0,0,.6);
+    padding: 3px 7px; border-radius: 4px;
+  }
+  .modal-media { position: absolute; inset: 0; background: #000 }
+  .modal-media img,
+  .modal-media video { width: 100%; height: 100%; object-fit: contain; display: block }
+  .modal-body { padding: 18px 20px 16px; display: flex; flex-direction: column; gap: 14px }
+  .modal-title { font-size: 16px; font-weight: 650; line-height: 1.35 }
+  .modal-note {
+    font-size: 12.5px;
+    line-height: 1.45;
+    background: var(--warn-soft);
+    border: 1px solid color-mix(in srgb, var(--warn) 30%, transparent);
+    border-radius: 6px;
+    padding: 8px 11px;
+  }
+  .modal-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border: 1px solid var(--border);
+    border-radius: 7px;
+  }
+  .modal-meta-cell { padding: 10px 14px }
+  .modal-meta-cell + .modal-meta-cell { border-left: 1px solid var(--border) }
+  .modal-meta-label { font-size: 11px; font-weight: 500; color: var(--fg-dim); margin-bottom: 2px }
+  .modal-meta-value { font-family: var(--mono); font-size: 13.5px; font-weight: 500 }
+  .modal-tags { display: flex; flex-wrap: wrap; gap: 4px }
+  .modal-tags:empty { display: none }
+  .modal-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap;
+    padding: 12px 20px 14px;
+    border-top: 1px solid var(--border);
+    gap: 10px;
+  }
+  .modal-path-full {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--fg-dim);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    flex: 1; min-width: 0;
+  }
+  .modal-links { display: flex; gap: 8px; flex-shrink: 0 }
+  .btn-link, .btn-close {
+    height: 32px;
+    display: inline-flex; align-items: center;
+    font-size: 13px; font-weight: 500;
+    padding: 0 12px; border-radius: 6px;
+    border: 1px solid var(--border-strong);
+    background: none;
+    color: var(--fg);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .12s;
+    flex-shrink: 0;
+  }
+  .btn-link:hover, .btn-close:hover { background: var(--surface-2) }
+  .btn-link.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600 }
+  .btn-link.primary:hover { background: var(--accent-hover) }
+
+  /* ── Clip menu + toast ──────────────────────────────── */
+  .menu {
+    position: fixed;
+    z-index: 120;
+    min-width: 196px;
+    padding: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    box-shadow: var(--shadow-pop);
+  }
+  .menu button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    height: 32px;
+    padding: 0 9px;
+    border: none;
+    border-radius: 5px;
+    background: none;
+    font-size: 13px;
+    text-align: left;
+  }
+  .menu button .ico { width: 15px; height: 15px; color: var(--fg-muted) }
+  .menu button:hover:not(:disabled), .menu button:focus-visible { background: var(--surface-2); outline: none }
+  .menu button:disabled { opacity: .4; cursor: not-allowed }
+  .menu button.danger, .menu button.danger .ico { color: var(--error) }
+  .menu hr { border: none; border-top: 1px solid var(--border); margin: 4px 2px }
+
+  .toast {
+    position: fixed;
+    left: 50%; bottom: max(24px, env(safe-area-inset-bottom, 0px));
+    z-index: 150;
+    max-width: calc(100vw - 32px);
+    padding: 9px 14px;
+    border-radius: 7px;
+    background: var(--fg);
+    color: var(--bg);
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: var(--shadow-pop);
+    transform: translate(-50%, 12px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s, transform .18s;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0) }
+
+  /* ── Scrollbar ──────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 8px; height: 8px }
+  ::-webkit-scrollbar-track { background: transparent }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box }
+  ::-webkit-scrollbar-thumb:hover { background-color: var(--border-strong) }
+
+  /* ── Responsive ─────────────────────────────────────── */
+  @media (max-width: 1080px) {
+    .shell { grid-template-columns: minmax(0, 1fr) }
+    .create-panel {
+      position: static;
+      height: auto;
+      overflow: visible;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .content { padding-left: max(28px, env(safe-area-inset-left, 0px)) }
+  }
+  @media (max-width: 760px) {
+    .topbar { padding-inline: 16px }
+    .create-head, .step, .generate { padding-inline: 16px }
+    .content { padding: 4px 16px 40px; gap: 32px }
+    .clips-head { column-gap: 12px }
+    .filter-tabs { order: 3; width: 100% }
+    .select-all span { display: none }
+    .kbd { display: none }
+    .clip-grid { gap: 22px 14px }
+    .modal-meta-grid { grid-template-columns: 1fr 1fr }
+    .modal-meta-cell:nth-child(3) { border-left: none; border-top: 1px solid var(--border); grid-column: 1 / -1 }
+  }
+  @media (max-width: 420px) {
+    .brand-div, .brand-sub { display: none }
+    .settings-row { grid-template-columns: minmax(0, 1fr) }
+    #downloadAllLabel { display: none }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important }
+  }
+</style>
+
+<!-- ── Top bar ─────────────────────────────────────────── -->
+<header class="topbar">
+  <div class="brand">
+    <svg class="brand-mark" viewBox="0 0 324.44 366.2" aria-hidden="true"><path d="M317.73,173.64l-168.89-97.52c-8.94-5.17-20.13,1.29-20.13,11.62v52.91c0,11.03,5.89,21.22,15.43,26.74l22.62,13.06c2.83,1.62,2.8,5.71-.05,7.3l-4.21,2.35-74.87,41.64c-.58.31-1.18.48-1.77.51-2.3.17-4.47-1.64-4.47-4.17V55c0-11.03-5.88-21.21-15.43-26.74L20.13,1.82C11.19-3.35,0,3.11,0,13.44v157.8c0,11.03,5.89,21.22,15.43,26.74l56.51,32.86c3.74,2.18,3.73,7.59-.02,9.75l-56.53,32.53c-9.55,5.53-15.4,15.73-15.4,26.76l.1,52.91c.02,10.33,11.23,16.77,20.15,11.59l84.42-48.92,53.49-29.77c9.8-5.45,15.86-15.78,15.86-26.97v-66.79c0-3.23,3.51-5.25,6.31-3.64l59.87,34.57c9.4,5.43,20.96,5.53,30.43.25l46.92-26.11c9.11-5.07,9.21-18.13.18-23.34Z"/></svg>
+    <span class="brand-name">Gifmor</span>
+    <span class="brand-div" aria-hidden="true"></span>
+    <span class="brand-sub">Clip Studio</span>
+  </div>
+
+  <div class="header-right">
+    <span class="server-pill demo" id="serverBadge"><i class="dot"></i>Demo</span>
+    <button class="icon-btn bordered" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">
+      <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor" stroke="none"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- ── Create sidebar ──────────────────────────────── -->
+  <aside class="panel create-panel" aria-label="New clip job">
+    <div class="create-head">
+      <h2>New job</h2>
+      <p>Point it at a long video, say what to look for, get back short clips.</p>
+    </div>
+
+    <section class="step">
+      <div class="step-head"><h3>Source</h3></div>
+      <div class="src-tabs" role="tablist" aria-label="Source type">
+        <button type="button" class="src-tab active" role="tab" data-src-mode="url" aria-selected="true" aria-controls="srcUrlPanel">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg>
+          Link
+        </button>
+        <button type="button" class="src-tab" role="tab" data-src-mode="upload" aria-selected="false" aria-controls="srcUploadPanel">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+          Upload
+        </button>
+      </div>
+
+      <div id="srcUrlPanel" role="tabpanel" class="field">
+        <div class="input-group">
+          <span class="url-kind" id="urlKind" aria-hidden="true"></span>
+          <input type="url" id="sourceUrl" aria-label="Video URL" placeholder="https://www.youtube.com/watch?v=…" autocomplete="off" spellcheck="false"
+                 value="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+          <button type="button" class="btn-paste" id="pasteBtn">Paste</button>
+        </div>
+        <span class="field-hint">YouTube, Vimeo, X, Twitch VODs or a direct .mp4 — anything yt-dlp can read.</span>
+      </div>
+
+      <div id="srcUploadPanel" role="tabpanel" hidden>
+        <input type="file" id="fileInput" accept="video/*,.mkv,.mov,.m4v,.webm,.avi,.ts" hidden>
+        <label class="dropzone" id="dropzone" for="fileInput" tabindex="0">
+          <span class="dz-icon">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+          </span>
+          <span class="dz-title">Drop a video or <u>browse</u></span>
+          <span class="dz-sub" id="dzSub">mp4 · mov · mkv · webm — up to 4 GB</span>
+        </label>
+        <div class="file-card" id="fileCard" hidden>
+          <span class="file-thumb">
+            <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5l5 2.5-5 2.5z" fill="currentColor" stroke="none"/></svg>
+          </span>
+          <div class="file-meta">
+            <div class="file-name" id="fileName"></div>
+            <div class="file-sub" id="fileSub"></div>
+            <div class="progress-track sm"><div class="progress-fill" id="fileProgress"></div></div>
+          </div>
+          <button type="button" class="icon-btn" id="fileRemove" title="Remove file" aria-label="Remove file">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="step">
+      <div class="step-head"><h3><label for="prompt">What to look for</label></h3></div>
+      <div class="textarea-wrap">
+        <textarea id="prompt" maxlength="500" placeholder="e.g. funny reactions, the moment the score is revealed, every time someone mentions pricing">funny reactions and surprised moments</textarea>
+        <div class="textarea-foot">
+          <button type="button" class="ai-btn" id="ideasBtn" aria-expanded="false" aria-controls="ideaChips">
+            Examples
+            <svg class="ico" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <span class="char-count" id="promptCount">0/500</span>
+        </div>
+      </div>
+      <div class="idea-chips" id="ideaChips" hidden>
+        <button type="button" class="idea-chip" data-idea="funny reactions and surprised moments">Funny reactions</button>
+        <button type="button" class="idea-chip" data-idea="key highlights and the most important points">Key points</button>
+        <button type="button" class="idea-chip" data-idea="emotional, heartfelt moments">Emotional</button>
+        <button type="button" class="idea-chip" data-idea="surprising twists and big reveals">Reveals</button>
+        <button type="button" class="idea-chip" data-idea="quotable one-liners and memorable quotes">Quotable lines</button>
+        <button type="button" class="idea-chip" data-idea="hype moments where the crowd or chat goes wild">Crowd hype</button>
+      </div>
+    </section>
+
+    <section class="step">
+      <div class="step-head"><h3>Output</h3></div>
+
+      <div class="field">
+        <span class="field-label" id="arLabel">Aspect ratio</span>
+        <div class="seg" role="radiogroup" aria-labelledby="arLabel">
+          <label class="seg-opt" title="Landscape — YouTube, web"><input type="radio" name="aspectRatio" value="16:9" checked><span><i class="ratio r169"></i>16:9</span></label>
+          <label class="seg-opt" title="Vertical — Shorts, Reels, TikTok"><input type="radio" name="aspectRatio" value="9:16"><span><i class="ratio r916"></i>9:16</span></label>
+          <label class="seg-opt" title="Square — feeds"><input type="radio" name="aspectRatio" value="1:1"><span><i class="ratio r11"></i>1:1</span></label>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="field">
+          <span class="field-label" id="framingLabel">Framing</span>
+          <div class="seg" role="radiogroup" aria-labelledby="framingLabel">
+            <label class="seg-opt" title="Fill the frame — the overflow is cropped from the centre"><input type="radio" name="framing" value="crop" checked><span>Fill</span></label>
+            <label class="seg-opt" title="Show the whole picture over a blurred background"><input type="radio" name="framing" value="blur"><span>Fit</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <span class="field-label" id="lenLabel">Length</span>
+          <div class="seg" role="radiogroup" aria-labelledby="lenLabel">
+            <label class="seg-opt"><input type="radio" name="clipLen" value="15"><span>15s</span></label>
+            <label class="seg-opt"><input type="radio" name="clipLen" value="30" checked><span>30s</span></label>
+            <label class="seg-opt"><input type="radio" name="clipLen" value="45"><span>45s</span></label>
+            <label class="seg-opt"><input type="radio" name="clipLen" value="60"><span>60s</span></label>
+          </div>
+        </div>
+      </div>
+      <span class="field-hint">Cuts snap to pauses in speech, so lengths vary by a few seconds.</span>
+
+      <div class="field">
+        <span class="field-label" id="countLabel">Number of clips</span>
+        <div class="seg seg-count" role="radiogroup" aria-labelledby="countLabel">
+          <label class="seg-opt"><input type="radio" name="clipPreset" value="3"><span>3</span></label>
+          <label class="seg-opt"><input type="radio" name="clipPreset" value="5" checked><span>5</span></label>
+          <label class="seg-opt"><input type="radio" name="clipPreset" value="10"><span>10</span></label>
+          <label class="seg-opt"><input type="radio" name="clipPreset" value="custom"><span>Custom</span></label>
+        </div>
+        <div class="custom-count" id="customCountWrap" hidden>
+          <input class="input" type="number" id="clipBudget" value="5" min="1" max="100" aria-label="Custom number of clips">
+          <span class="field-hint">clips, 1–100</span>
+        </div>
+      </div>
+
+      <div class="adv">
+        <button type="button" class="adv-toggle" id="advToggle" aria-expanded="false" aria-controls="advFields">
+          Advanced
+          <svg class="ico chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="advanced-fields adv-fields" id="advFields" hidden>
+          <div class="field">
+            <label class="field-label" for="negativePrompt">Avoid</label>
+            <input class="input" type="text" id="negativePrompt" placeholder="Moments to leave out (optional)">
+          </div>
+          <div class="settings-row">
+            <div class="field">
+              <label class="field-label" for="chunkLen">Chunk length (s)</label>
+              <input class="input" type="number" id="chunkLen" value="300" min="30" max="1800">
+            </div>
+            <div class="field">
+              <label class="field-label" for="clipOutputSec">Exact clip length (s)</label>
+              <input class="input" type="number" id="clipOutputSec" value="30" min="5" max="300">
+            </div>
+          </div>
+          <span class="field-hint">Longer chunks mean fewer model calls but coarser matching.</span>
+          <div class="field">
+            <label class="field-label" for="orgId">Org ID</label>
+            <input class="input" type="text" id="orgId" value="demo-org" placeholder="Organisation ID">
+          </div>
+          <div class="field">
+            <label class="check-row" for="strongOnly">
+              <input type="checkbox" id="strongOnly">
+              Strong matches only
+            </label>
+            <span class="field-hint">Off: if there aren't enough strong matches, the rest are filled with the closest moments and marked “Best available”.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="generate">
+      <button class="btn-generate" id="startBtn">
+        <div class="spinner" id="startSpinner"></div>
+        <svg class="ico play-icon" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.12 8.12L20 20M20 4L8.12 15.88"/></svg>
+        Generate clips
+        <kbd class="kbd" id="genKbd">Ctrl ↵</kbd>
+      </button>
+      <p class="gen-note" id="genNote">Scans the whole video, then cuts the best moments.</p>
+    </div>
+  </aside>
+
+  <!-- ── Library ─────────────────────────────────────── -->
+  <main id="main" class="content">
+
+    <section class="panel clips-panel" aria-labelledby="clipsTitle">
+      <div class="clips-head">
+        <div class="clips-title">
+          <h1 id="clipsTitle">Clips</h1>
+          <span class="count-chip" id="statClips">0 clips</span>
+        </div>
+        <div class="filter-tabs" role="tablist" aria-label="Filter clips">
+          <button type="button" class="filter-tab active" role="tab" aria-selected="true"  data-filter="all">All <span class="n">0</span></button>
+          <button type="button" class="filter-tab" role="tab" aria-selected="false" data-filter="top" title="Strong prompt matches (score ≥ 75%)">Top matches <span class="n">0</span></button>
+          <button type="button" class="filter-tab" role="tab" aria-selected="false" data-filter="processing">Processing <span class="n">0</span></button>
+        </div>
+        <div class="bulk">
+          <label class="select-all"><input type="checkbox" id="selectAll"><span>Select all</span></label>
+          <button type="button" class="btn btn-outline" id="downloadAllBtn">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+            <span id="downloadAllLabel">Download all</span>
+          </button>
+          <button type="button" class="icon-btn danger" id="removeSelBtn" title="Remove selected clips from the list" aria-label="Remove selected clips from the list" disabled>
+            <svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="clip-grid" id="clipGrid" hidden>
+        <div class="more-card" id="moreCard">
+          <h3>Run another pass</h3>
+          <p>Change the prompt or settings and generate again — new clips land here.</p>
+          <button type="button" class="btn btn-outline" id="genMoreBtn">Edit prompt</button>
+        </div>
+      </div>
+
+      <div class="empty-state" id="emptyState">
+        <svg class="empty-art" viewBox="0 0 256 48" aria-hidden="true">
+          <rect class="win" x="33" y="0" width="34" height="48" rx="3"/>
+          <rect class="win" x="113" y="0" width="26" height="48" rx="3"/>
+          <rect class="win" x="181" y="0" width="34" height="48" rx="3"/>
+          <path class="wave" d="M0 21.0h2v6h-2zM4 5.5h2v37h-2zM8 16.0h2v16h-2zM12 17.5h2v13h-2zM16 8.5h2v31h-2zM20 12.0h2v24h-2zM24 15.5h2v17h-2zM28 8.0h2v32h-2zM32 8.0h2v32h-2zM68 20.0h2v8h-2zM72 9.5h2v29h-2zM76 13.0h2v22h-2zM80 5.5h2v37h-2zM84 7.5h2v33h-2zM88 19.0h2v10h-2zM92 12.5h2v23h-2zM96 5.5h2v37h-2zM100 9.5h2v29h-2zM104 10.0h2v28h-2zM108 11.0h2v26h-2zM112 5.5h2v37h-2zM140 16.0h2v16h-2zM144 13.5h2v21h-2zM148 16.0h2v16h-2zM152 5.0h2v38h-2zM156 11.5h2v25h-2zM160 8.5h2v31h-2zM164 6.0h2v36h-2zM168 20.0h2v8h-2zM172 16.5h2v15h-2zM176 11.5h2v25h-2zM180 12.5h2v23h-2zM216 12.0h2v24h-2zM220 18.0h2v12h-2zM224 14.0h2v20h-2zM228 16.0h2v16h-2zM232 15.0h2v18h-2zM236 14.0h2v20h-2zM240 15.5h2v17h-2zM244 12.0h2v24h-2zM248 10.5h2v27h-2zM252 17.0h2v14h-2z"/>
+          <path class="cut" d="M36 9.0h2v30h-2zM40 6.5h2v35h-2zM44 7.0h2v34h-2zM48 4.0h2v40h-2zM52 14.0h2v20h-2zM56 11.5h2v25h-2zM60 6.0h2v36h-2zM64 6.0h2v36h-2zM116 2.5h2v43h-2zM120 11.5h2v25h-2zM124 12.5h2v23h-2zM128 4.0h2v40h-2zM132 12.5h2v23h-2zM136 15.5h2v17h-2zM184 11.0h2v26h-2zM188 14.5h2v19h-2zM192 2.5h2v43h-2zM196 17.0h2v14h-2zM200 12.0h2v24h-2zM204 12.0h2v24h-2zM208 6.5h2v35h-2zM212 2.5h2v43h-2z"/>
+        </svg>
+        <h3 id="emptyTitle">No clips yet</h3>
+        <p id="emptyText">Add a video link or file, describe the moments to look for, then generate. Each match is cut into its own clip and lands here.</p>
+        <button type="button" class="btn btn-outline" id="emptyCta">Add a video</button>
+      </div>
+    </section>
+
+    <section class="panel" id="jobsPanel" hidden>
+      <div class="panel-head">
+        <h2>Jobs</h2>
+        <span class="count-chip"><span id="statJobs">0</span> total</span>
+        <span class="count-chip running"><span id="statRunning">0</span> running</span>
+      </div>
+      <div class="job-list" id="jobList"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ── Clip detail modal ──────────────────────────────── -->
+<div class="modal-backdrop" id="modalBackdrop" hidden>
+  <div class="modal" id="modalBox" role="dialog" aria-modal="true" aria-labelledby="modalCaption">
+    <div class="modal-thumb">
+      <canvas id="modalCanvas" width="640" height="360"></canvas>
+      <div class="modal-media" id="modalMedia" hidden></div>
+      <div class="modal-thumb-overlay" id="modalOverlay">
+        <div class="modal-play-btn" title="Demo clip — no file">
+          <svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg>
+        </div>
+      </div>
+      <span class="modal-path" id="modalPathShort"></span>
+    </div>
+    <div class="modal-body">
+      <div class="modal-title" id="modalCaption"></div>
+      <div class="modal-note" id="modalNote" hidden></div>
+      <div class="modal-meta-grid">
+        <div class="modal-meta-cell">
+          <div class="modal-meta-label">In source</div>
+          <div class="modal-meta-value" id="modalStart"></div>
+        </div>
+        <div class="modal-meta-cell">
+          <div class="modal-meta-label">Duration</div>
+          <div class="modal-meta-value" id="modalDur"></div>
+        </div>
+        <div class="modal-meta-cell">
+          <div class="modal-meta-label">Match</div>
+          <div class="modal-meta-value" id="modalScore"></div>
+        </div>
+      </div>
+      <div class="modal-tags" id="modalTags"></div>
+    </div>
+    <div class="modal-footer">
+      <span class="modal-path-full" id="modalPathFull"></span>
+      <div class="modal-links" id="modalLinks"></div>
+      <button class="btn-close" id="modalClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Clip "more" menu ───────────────────────────────── -->
+<div class="menu" id="clipMenu" role="menu" hidden>
+  <button type="button" role="menuitem" data-menu="details">
+    <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>Details
+  </button>
+  <button type="button" role="menuitem" data-menu="open">
+    <svg class="ico" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open in new tab
+  </button>
+  <button type="button" role="menuitem" data-menu="copy">
+    <svg class="ico" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Copy link
+  </button>
+  <hr>
+  <button type="button" role="menuitem" class="danger" data-menu="remove">
+    <svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Remove from list
+  </button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Config ────────────────────────────────────────────
+  // Served by server.ts → same origin (any PORT); opened as a file → the default local server.
+  const API_BASE = /^https?:$/.test(location.protocol) ? location.origin : 'http://localhost:3737';
+  let useRealBackend = false; // true while the server answers pings
+  let everLive = false;       // reached the server at least once — a failed ping now means "reconnecting", not demo mode
+  let maxUploadBytes = 4 * 1024 ** 3; // replaced by the server's limit (GET /config)
+
+  // ── State ─────────────────────────────────────────────
+  let jobs   = [];
+  let nextId = 1;
+  let pollTimer = null;
+
+  const STATUSES = ['queued','downloading','processing','done','failed','stopped'];
+
+  // Clip-panel view state
+  let clipFilter = 'all';
+  const selected     = new Set(); // clip ids ticked in the grid
+  const removedClips = new Set(); // clip ids hidden from the list (client-side only)
+
+  // ── DOM refs ──────────────────────────────────────────
+  const jobsPanel  = document.getElementById('jobsPanel');
+  const jobListEl  = document.getElementById('jobList');
+  const clipGrid   = document.getElementById('clipGrid');
+  const moreCard   = document.getElementById('moreCard');
+  const emptyState = document.getElementById('emptyState');
+  const emptyTitle = document.getElementById('emptyTitle');
+  const emptyText  = document.getElementById('emptyText');
+  const startBtn   = document.getElementById('startBtn');
+  const advToggle  = document.getElementById('advToggle');
+  const advFields  = document.getElementById('advFields');
+  const themeBtn   = document.getElementById('themeBtn');
+  const statJobsEl    = document.getElementById('statJobs');
+  const statClipsEl   = document.getElementById('statClips');
+  const statRunningEl = document.getElementById('statRunning');
+  const selectAllEl      = document.getElementById('selectAll');
+  const downloadAllBtn   = document.getElementById('downloadAllBtn');
+  const downloadAllLabel = document.getElementById('downloadAllLabel');
+  const removeSelBtn     = document.getElementById('removeSelBtn');
+  const toastEl    = document.getElementById('toast');
+
+  // ── Theme ────────────────────────────────────────────
+  let darkMode = null; // null = system
+  function applyTheme() {
+    if (darkMode === true)       document.documentElement.setAttribute('data-theme','dark');
+    else if (darkMode === false) document.documentElement.setAttribute('data-theme','light');
+    else                         document.documentElement.removeAttribute('data-theme');
+  }
+  themeBtn.addEventListener('click', () => {
+    const sys = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (darkMode === null)         darkMode = !sys;
+    else if (darkMode !== sys)     darkMode = null;
+    else                           darkMode = !darkMode;
+    applyTheme();
+  });
+
+  // ── Advanced toggle ──────────────────────────────────
+  function toggleAdv() {
+    const open = !advFields.hidden;
+    advFields.hidden = open;
+    advToggle.classList.toggle('open', !open);
+    advToggle.setAttribute('aria-expanded', String(!open));
+  }
+  advToggle.addEventListener('click', toggleAdv);
+
+  // ── Toast ────────────────────────────────────────────
+  let toastTimer = null;
+  function toast(msg, ms = 2600) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), ms);
+  }
+
+  // ── Form controls ────────────────────────────────────
+  const sourceInput = document.getElementById('sourceUrl');
+  const urlKindEl   = document.getElementById('urlKind');
+  const promptEl    = document.getElementById('prompt');
+  const promptCount = document.getElementById('promptCount');
+  const ideasBtn    = document.getElementById('ideasBtn');
+  const ideaChips   = document.getElementById('ideaChips');
+  const budgetEl    = document.getElementById('clipBudget');
+  const customWrap  = document.getElementById('customCountWrap');
+  const clipLenEl   = document.getElementById('clipOutputSec');
+  const genNoteEl   = document.getElementById('genNote');
+
+  const SRC_ICONS = {
+    youtube: '<svg class="ico" viewBox="0 0 24 24" style="stroke:none"><rect x="2" y="5" width="20" height="14" rx="4" fill="#ff0033"/><path d="M10 9l5 3-5 3z" fill="#fff"/></svg>',
+    link:    '<svg class="ico" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg>',
+    upload:  '<svg class="ico" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>',
+  };
+
+  function detectSourceKind(v) {
+    if (/youtu\.?be/i.test(v))   return 'youtube';
+    if (/^https?:\/\//i.test(v)) return 'link';
+    return null;
+  }
+
+  // Source: a pasted link ('url') or a file uploaded from the browser ('upload').
+  let sourceMode = 'url';
+  function setSourceMode(mode) {
+    sourceMode = mode;
+    document.querySelectorAll('[data-src-mode]').forEach(b => {
+      const on = b.dataset.srcMode === mode;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', String(on));
+    });
+    document.getElementById('srcUrlPanel').hidden    = mode !== 'url';
+    document.getElementById('srcUploadPanel').hidden = mode !== 'upload';
+  }
+  document.querySelectorAll('[data-src-mode]').forEach(b => b.addEventListener('click', () => setSourceMode(b.dataset.srcMode)));
+
+  function updateUrlKind() {
+    urlKindEl.innerHTML = SRC_ICONS[detectSourceKind(sourceInput.value.trim()) || 'link'];
+  }
+  sourceInput.addEventListener('input', updateUrlKind);
+  updateUrlKind();
+
+  document.getElementById('pasteBtn').addEventListener('click', async () => {
+    try {
+      const text = (await navigator.clipboard.readText()).trim();
+      if (!text) return toast('Clipboard is empty');
+      sourceInput.value = text;
+      updateUrlKind();
+    } catch {
+      sourceInput.focus();
+      sourceInput.select();
+      toast('Clipboard access blocked — press Ctrl+V instead');
+    }
+  });
+
+  // ── Upload ───────────────────────────────────────────
+  // upload = { file, status: 'uploading' | 'ready' | 'error', pct, uploadId?, durationSec?, error?, xhr? }
+  const fileInput    = document.getElementById('fileInput');
+  const dropzone     = document.getElementById('dropzone');
+  const fileCard     = document.getElementById('fileCard');
+  const fileNameEl   = document.getElementById('fileName');
+  const fileSubEl    = document.getElementById('fileSub');
+  const fileProgress = document.getElementById('fileProgress');
+  let upload = null;
+
+  function fmtBytes(n) {
+    if (n >= 1024 ** 3) return (n / 1024 ** 3).toFixed(2) + ' GB';
+    if (n >= 1024 ** 2) return (n / 1024 ** 2).toFixed(1) + ' MB';
+    return Math.max(1, Math.round(n / 1024)) + ' KB';
+  }
+
+  // Round figure for a limit: "16 GB", "500 MB".
+  function fmtLimit(n) {
+    return n >= 1024 ** 3 ? `${Math.round(n / 1024 ** 3)} GB` : `${Math.round(n / 1024 ** 2)} MB`;
+  }
+
+  function renderUpload() {
+    dropzone.hidden = !!upload;
+    fileCard.hidden = !upload;
+    if (!upload) return;
+    fileCard.classList.toggle('ready', upload.status === 'ready');
+    fileCard.classList.toggle('error', upload.status === 'error');
+    fileNameEl.textContent = upload.file.name;
+    fileNameEl.title       = upload.file.name;
+    fileSubEl.textContent =
+      upload.status === 'uploading' ? `Uploading… ${Math.round(upload.pct)}% of ${fmtBytes(upload.file.size)}`
+      : upload.status === 'ready'   ? `${fmtBytes(upload.file.size)}${upload.durationSec ? ' · ' + fmtTime(upload.durationSec) : ''} · ready`
+      : upload.error || 'Upload failed';
+    fileProgress.style.width = (upload.status === 'ready' ? 100 : upload.pct) + '%';
+  }
+
+  function clearUpload() {
+    if (!upload) return;
+    if (upload.xhr) upload.xhr.abort();
+    // A job already started from this upload keeps its own copy on the server.
+    if (upload.uploadId) fetch(`${API_BASE}/uploads/${upload.uploadId}`, { method: 'DELETE' }).catch(() => {});
+    upload = null;
+    fileInput.value = '';
+    renderUpload();
+  }
+
+  function setFile(file) {
+    if (!file) return;
+    if (!/^video\//.test(file.type) && !/\.(mp4|mov|m4v|mkv|webm|avi|wmv|flv|mpe?g|ts|3gp)$/i.test(file.name)) {
+      return toast('That doesn’t look like a video file');
+    }
+    if (file.size > maxUploadBytes) return toast(`That file is larger than the ${fmtLimit(maxUploadBytes)} upload limit`);
+    clearUpload();
+    const current = upload = { file, status: 'uploading', pct: 0 };
+    renderUpload();
+    if (!useRealBackend) {
+      // Demo mode: no server to upload to — the simulated job only needs the name.
+      current.status = 'ready';
+      renderUpload();
+      return;
+    }
+    // XHR rather than fetch: it reports upload progress. The body is the raw file, streamed by the browser.
+    const xhr = current.xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_BASE}/uploads`);
+    xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name));
+    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+    xhr.upload.onprogress = e => {
+      if (upload !== current || !e.lengthComputable) return;
+      current.pct = e.loaded / e.total * 100;
+      renderUpload();
+    };
+    xhr.onload = () => {
+      if (upload !== current) return;
+      let data = {};
+      try { data = JSON.parse(xhr.responseText); } catch { /* non-JSON error page */ }
+      if (xhr.status >= 200 && xhr.status < 300 && data.uploadId) {
+        Object.assign(current, { status: 'ready', uploadId: data.uploadId, durationSec: data.durationSec, xhr: null });
+      } else {
+        const error = data.error
+          || (xhr.status === 404 ? 'This server has no upload endpoint — restart it (npm run server)' : `Upload failed (HTTP ${xhr.status})`);
+        Object.assign(current, { status: 'error', error, xhr: null });
+      }
+      renderUpload();
+    };
+    xhr.onerror = () => {
+      if (upload !== current) return;
+      Object.assign(current, { status: 'error', error: 'Upload failed — is the server running?', xhr: null });
+      renderUpload();
+    };
+    xhr.send(file);
+  }
+
+  fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
+  dropzone.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+  });
+  ['dragenter', 'dragover'].forEach(t => dropzone.addEventListener(t, e => { e.preventDefault(); dropzone.classList.add('drag'); }));
+  ['dragleave', 'drop'].forEach(t => dropzone.addEventListener(t, e => { e.preventDefault(); dropzone.classList.remove('drag'); }));
+  dropzone.addEventListener('drop', e => setFile(e.dataTransfer?.files?.[0]));
+  document.getElementById('fileRemove').addEventListener('click', clearUpload);
+
+  function updatePromptCount() {
+    promptCount.textContent = `${promptEl.value.length}/${promptEl.maxLength}`;
+  }
+  promptEl.addEventListener('input', updatePromptCount);
+  updatePromptCount();
+
+  ideasBtn.addEventListener('click', () => {
+    ideaChips.hidden = !ideaChips.hidden;
+    ideasBtn.setAttribute('aria-expanded', String(!ideaChips.hidden));
+  });
+  ideaChips.addEventListener('click', e => {
+    const chip = e.target.closest('[data-idea]');
+    if (!chip) return;
+    promptEl.value = chip.dataset.idea;
+    updatePromptCount();
+    promptEl.focus();
+  });
+
+  function radioValue(name) {
+    return document.querySelector(`input[name="${name}"]:checked`)?.value;
+  }
+
+  function updateGenNote() {
+    const n   = Math.min(100, Math.max(1, parseInt(budgetEl.value, 10) || 5));
+    const len = Math.min(300, Math.max(5, parseInt(clipLenEl.value, 10) || 30));
+    genNoteEl.textContent = `Scans the whole video, then cuts the best ${n} clip${n > 1 ? 's' : ''} of ~${len}s.`;
+  }
+  document.querySelectorAll('input[name="clipPreset"]').forEach(r => r.addEventListener('change', () => {
+    const custom = r.value === 'custom';
+    customWrap.hidden = !custom;
+    if (custom) budgetEl.focus(); else budgetEl.value = r.value;
+    updateGenNote();
+  }));
+  // Length presets write the Advanced field; a custom value there un-highlights the presets.
+  document.querySelectorAll('input[name="clipLen"]').forEach(r => r.addEventListener('change', () => {
+    clipLenEl.value = r.value;
+    updateGenNote();
+  }));
+  clipLenEl.addEventListener('input', () => {
+    const v = String(parseInt(clipLenEl.value, 10));
+    document.querySelectorAll('input[name="clipLen"]').forEach(r => { r.checked = r.value === v; });
+    updateGenNote();
+  });
+  budgetEl.addEventListener('input', updateGenNote);
+  updateGenNote();
+
+  function focusForm(el) {
+    if (window.matchMedia('(max-width: 1080px)').matches) {
+      document.querySelector('.create-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    el.focus({ preventScroll: true });
+  }
+  document.getElementById('genMoreBtn').addEventListener('click', () => { focusForm(promptEl); promptEl.select(); });
+  document.getElementById('emptyCta').addEventListener('click', () => focusForm(sourceMode === 'url' ? sourceInput : dropzone));
+
+  // ── Helpers ──────────────────────────────────────────
+  function uuid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
+  function fmtTime(sec) {
+    if (!isFinite(sec)) return '—';
+    const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  // Zero-padded mm:ss for the duration badge on clip cards.
+  function fmtClock(sec) {
+    if (!isFinite(sec)) return '--:--';
+    const m = Math.floor(sec / 60), s = Math.round(sec % 60);
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  function fmtDur(startDate, endDate) {
+    const ms = (endDate ?? new Date()) - startDate;
+    const s = Math.floor(ms / 1000);
+    if (s < 60)  return `${s}s`;
+    const m = Math.floor(s / 60);
+    return `${m}m ${s % 60}s`;
+  }
+
+  function shortUrl(s) {
+    try {
+      const u = new URL(s);
+      return u.hostname + (u.pathname.length > 20 ? u.pathname.slice(0, 20) + '…' : u.pathname);
+    } catch { return s.length > 40 ? s.slice(0, 40) + '…' : s; }
+  }
+
+  const TERMINAL    = ['done','failed','stopped'];
+  const SCAN_PHASES = ['extracting','transcribing','scoring'];
+
+  // Mirrors the backend scan loop: a final remainder shorter than MIN_FLUSH_SEC is folded
+  // into the previous chunk, so ceil(total / chunk) can over-count by one.
+  const MIN_FLUSH_SEC = 15;
+  function chunkCount(job) {
+    const total = job.totalDurationSec, len = job.chunkLengthSec;
+    if (!(total > 0) || !(len > 0)) return 0;
+    let n = 0;
+    for (let cursor = 0; cursor < total && n < 10000; n++) {
+      let end = Math.min(cursor + len, total);
+      if (total - end < MIN_FLUSH_SEC) end = total;
+      cursor = end;
+    }
+    return Math.max(1, n);
+  }
+
+  // How many clips the render phase is actually cutting: the backend logs
+  // "Picked N moment(s)" before rendering; fall back to the requested count.
+  function renderTarget(job) {
+    const events = Array.isArray(job.events) ? job.events : [];
+    for (let i = events.length - 1; i >= 0; i--) {
+      const m = /^Picked (\d+) moment/.exec(events[i]?.message || '');
+      if (m) return Math.max(1, parseInt(m[1], 10));
+    }
+    return Math.max(1, job.clipBudget || 1);
+  }
+
+  // Real jobs: scanning 0–70%, selecting 72%, rendering 72–100%.
+  function realProgressPct(job) {
+    if (job.status === 'done') return 100;
+    if (job.status === 'failed' || job.status === 'stopped') return job._pct ?? 0;
+    if (job.status === 'queued' || job.status === 'downloading') return 0;
+    const phase = job.phase || 'idle';
+    if (phase === 'selecting') return 72;
+    if (phase === 'rendering') {
+      const frac = Math.min(1, (job.clipsEmitted || 0) / renderTarget(job));
+      return Math.round(72 + 28 * frac);
+    }
+    if (SCAN_PHASES.includes(phase)) {
+      const total = chunkCount(job);
+      if (!total) return 0;
+      // Transcription and scoring run side by side; scoring is the slower half and finishes last.
+      if (job.scannedChunks !== undefined) {
+        const t = Math.min(total, job.transcribedChunks || 0), sc = Math.min(total, job.scannedChunks || 0);
+        return Math.round((t * 0.3 + sc * 0.7) / total * 70);
+      }
+      const done = Math.min(total, (job.currentChunkIndex || 0) + 1);
+      return Math.round(done / total * 70);
+    }
+    return job._pct ?? 0;
+  }
+
+  // Human-readable step for a running real job ('' when not applicable).
+  function phaseText(job) {
+    if (!job._real || TERMINAL.includes(job.status)) return '';
+    if (job.status === 'queued')      return 'Queued — waiting to start';
+    if (job.status === 'downloading') {
+      // Links are scanned from their audio track alone; each clip's picture is streamed later.
+      const what = /^https?:\/\//i.test(job.sourceUrl || '') ? 'Downloading audio' : 'Preparing video';
+      return job.downloadPct > 0 ? `${what}… ${Math.floor(job.downloadPct)}%` : `${what}…`;
+    }
+    const phase = job.phase || 'idle';
+    const n = job.clipBudget;
+    if (SCAN_PHASES.includes(phase)) {
+      const total = chunkCount(job);
+      if (job.scannedChunks !== undefined && total) {
+        const t = Math.min(total, job.transcribedChunks || 0), sc = Math.min(total, job.scannedChunks || 0);
+        return t < total
+          ? `Scanning — ${t}/${total} chunks transcribed, ${sc} scored`
+          : `Scanning — ${sc}/${total} chunks scored`;
+      }
+      const cur   = (job.currentChunkIndex || 0) + 1;
+      return total
+        ? `Scanning chunk ${Math.min(cur, total)}/${total} — ${phase}`
+        : `Scanning chunk ${cur} — ${phase}`;
+    }
+    if (phase === 'selecting') {
+      return job.fillToTarget === false
+        ? `Picking up to ${n} strong matches`
+        : `Picking the best ${n} moments`;
+    }
+    if (phase === 'rendering') {
+      const t = renderTarget(job);
+      return `Rendering clip ${Math.min((job.clipsEmitted || 0) + 1, t)}/${t}`;
+    }
+    return 'Preparing…';
+  }
+
+  // Step text for any running job — real jobs use phaseText(), simulated ones are derived here.
+  function procText(job) {
+    if (TERMINAL.includes(job.status)) return '';
+    const p = phaseText(job);
+    if (p) return p;
+    if (job.status === 'queued')      return 'Queued — waiting to start';
+    if (job.status === 'downloading') return 'Downloading video…';
+    if (job.totalDurationSec > 0) {
+      const total = Math.max(1, Math.ceil(job.totalDurationSec / job.chunkLengthSec));
+      return `Scanning chunk ${Math.min((job.currentChunkIndex || 0) + 1, total)}/${total}`;
+    }
+    return 'Processing…';
+  }
+
+  // Why a finished real job returned fewer clips than requested ('' when not applicable).
+  function shortfallNotice(job) {
+    if (!job._real || !['done','failed'].includes(job.status)) return '';
+    const got = job.outputs.length;
+    if (got >= job.clipBudget) return '';
+    const events    = Array.isArray(job.events) ? job.events : [];
+    let lastEvent   = events.length ? (events[events.length - 1]?.message || '') : '';
+    // "Done — 3/5 cut (…)" means every feasible clip was cut; the real reason is the
+    // earlier "video can hold at most N" capacity notice.
+    if (/^Done\b/.test(lastEvent)) {
+      const cap = [...events].reverse().find(e => /\bat most \d+/i.test(e?.message || ''));
+      if (cap) lastEvent = cap.message;
+    }
+    const reason = job.status === 'failed'
+      ? (job.errorMessage || lastEvent || 'The job failed.')
+      : (lastEvent || job.errorMessage || 'The scan found fewer matching moments than requested.');
+    const cls  = job.status === 'failed' ? 'job-notice error' : 'job-notice';
+    const head = job.status === 'failed'
+      ? `Failed — ${got} of ${job.clipBudget} clips.`
+      : `Only ${got} of ${job.clipBudget} clips.`;
+    return `<div class="${cls}"><strong>${escHtml(head)}</strong> ${escHtml(reason)}</div>`;
+  }
+
+  function progressPct(job) {
+    if (job._real) return realProgressPct(job);
+    if (job.status === 'done') return 100;
+    if (job.status === 'failed' || job.status === 'stopped') return job._pct ?? 0;
+    if (job.status === 'queued') return 0;
+    if (job.status === 'downloading') return 5 + (job._dlPct ?? 0) * 0.2;
+    // processing: chunk progress
+    if (job.totalDurationSec > 0) {
+      const chunks = Math.ceil(job.totalDurationSec / job.chunkLengthSec);
+      return 25 + Math.round(job.currentChunkIndex / Math.max(1, chunks) * 70);
+    }
+    return 30;
+  }
+
+  // ── Simulation engine ────────────────────────────────
+  // Simulates the VideoClipService pipeline so the dashboard
+  // shows realistic state transitions and outputs without
+  // needing the actual backend wired up.
+
+  const SAMPLE_CAPTIONS = [
+    'Accidentally reveals the whole plan',
+    'Cannot believe what just happened',
+    'Perfectly timed reaction shot',
+    'Crowd erupts after the moment',
+    'Unexpected twist in conversation',
+    'Classic double-take and stumble',
+    'Best one-liner of the episode',
+    'Genuine laugh breaks character',
+    'Face says everything words cannot',
+    'Chaos unfolds in real time',
+  ];
+
+  const SAMPLE_TAGS = [
+    ['funny','reaction','shocked'],
+    ['emotional','reveal','gasp'],
+    ['crowd','energy','loud'],
+    ['awkward','stumble','classic'],
+    ['laugh','outtake','genuine'],
+  ];
+
+  function makeFakeOutput(job, clipNo, chunkStart = 0, chunkEnd = job.totalDurationSec) {
+    const window = chunkEnd - chunkStart;
+    const start  = chunkStart + Math.random() * Math.max(0, window - job.clipOutputSec);
+    const dur    = job.clipOutputSec || (10 + Math.random() * 20);
+    return {
+      id:             uuid(),
+      jobId:          job.id,
+      orgId:          job.orgId,
+      clipNo,
+      startSec:       Math.round(start * 10) / 10,
+      endSec:         Math.round((start + dur) * 10) / 10,
+      durationSec:    Math.round(dur * 10) / 10,
+      outputPath:     `/clips/${job.id}/clip_${clipNo}.mp4`,
+      thumbPath:      `/clips/${job.id}/thumb_${clipNo}.jpg`,
+      caption:        SAMPLE_CAPTIONS[clipNo % SAMPLE_CAPTIONS.length],
+      matchScore:     0.75 + Math.random() * 0.24,
+      creditsCharged: 1,
+      createdAt:      new Date(),
+      _tags:          SAMPLE_TAGS[clipNo % SAMPLE_TAGS.length],
+    };
+  }
+
+  async function simulateJob(job) {
+    const log = (msg, type = 'info') => {
+      job.logs.push({ msg, type, ts: new Date() });
+      renderJob(job);
+    };
+
+    // queued → downloading
+    await sleep(300);
+    if (job.status === 'stopped') return;
+    job.status = 'downloading';
+    log('[Ingest] Resolving source URL…');
+    renderJob(job);
+
+    await sleep(600 + Math.random() * 800);
+    if (job.status === 'stopped') return;
+    job._dlPct = 50;
+    log('[Ingest] Downloading video…');
+    renderJob(job);
+
+    await sleep(800 + Math.random() * 600);
+    if (job.status === 'stopped') return;
+    job._dlPct = 100;
+    job.totalDurationSec = 120 + Math.random() * 1800; // 2–32 min
+    log(`[Ingest] Video ready. Duration: ${fmtTime(job.totalDurationSec)}`);
+    renderJob(job);
+
+    // downloading → processing
+    await sleep(200);
+    if (job.status === 'stopped') return;
+    job.status = 'processing';
+    renderJob(job);
+
+    const totalChunks = Math.max(1, Math.ceil(job.totalDurationSec / job.chunkLengthSec));
+    // Distribute budget evenly across chunks so all requested clips are found
+    const clipsPerChunk = Math.ceil(job.clipBudget / totalChunks);
+
+    for (let chunk = 0; chunk < totalChunks; chunk++) {
+      if (job.status === 'stopped') return;
+      job.currentChunkIndex = chunk;
+      const chunkStart = chunk * job.chunkLengthSec;
+      const chunkEnd   = Math.min(chunkStart + job.chunkLengthSec, job.totalDurationSec);
+      const remaining  = job.clipBudget - job.clipsEmitted;
+      if (remaining <= 0) { log('[Process] Budget reached, stopping.', 'ok'); break; }
+
+      log(`[Process] Chunk ${chunk + 1}/${totalChunks} — ${fmtTime(chunkStart)}–${fmtTime(chunkEnd)}`);
+      renderJob(job);
+
+      await sleep(300);
+      if (job.status === 'stopped') return;
+
+      // Transcript scan log (mirrors VideoScorerService output)
+      const wordsInChunk = Math.floor((chunkEnd - chunkStart) / 0.4); // ~0.4s/word estimate
+      log(`[Scorer] Scanning transcript: ~${wordsInChunk} words, chunk=${(chunkEnd-chunkStart).toFixed(1)}s, maxMoments=${Math.min(clipsPerChunk, remaining)}`);
+      renderJob(job);
+
+      await sleep(600 + Math.random() * 900);
+      if (job.status === 'stopped') return;
+
+      log(`[Scorer] Calling Gemini: duration=${(chunkEnd - chunkStart).toFixed(1)}s minScore=0.75 maxMoments=${Math.min(clipsPerChunk, remaining)}`);
+      renderJob(job);
+
+      await sleep(700 + Math.random() * 800);
+      if (job.status === 'stopped') return;
+
+      // Emit clipsPerChunk clips from this chunk (always hit target unless last chunk)
+      const isLastChunk = chunk === totalChunks - 1;
+      // On last chunk emit whatever is left; otherwise exactly clipsPerChunk (with 10% chance of 1 fewer to be realistic)
+      const emit = Math.min(remaining, isLastChunk
+        ? remaining
+        : (Math.random() < 0.1 ? Math.max(0, clipsPerChunk - 1) : clipsPerChunk));
+
+      if (emit === 0) {
+        log(`[Scorer] No strong matches in this chunk (threshold 0.75 not met).`, 'dim');
+      }
+
+      for (let e = 0; e < emit; e++) {
+        if (job.status === 'stopped') return;
+        const out = makeFakeOutput(job, job.clipsEmitted + 1, chunkStart, chunkEnd);
+        job.outputs.push(out);
+        job.clipsEmitted++;
+        log(`[Output] Clip #${job.clipsEmitted} → "${out.caption}" score=${out.matchScore.toFixed(2)} at ${fmtTime(out.startSec)}`, 'ok');
+        renderJob(job);
+        await sleep(100);
+      }
+
+      job._pct = progressPct(job);
+      renderJob(job);
+    }
+
+    if (job.status === 'stopped') return;
+    job.status = 'done';
+    job.endedAt = new Date();
+    job._pct = 100;
+    log(`[Done] Job complete. ${job.clipsEmitted} clip(s) emitted in ${fmtDur(job.startedAt, job.endedAt)}.`, 'ok');
+    renderJob(job);
+  }
+
+  function sleep(ms) {
+    return new Promise(r => setTimeout(r, ms));
+  }
+
+  // ── Backend ping ──────────────────────────────────────
+  async function pingBackend() {
+    try {
+      const r = await fetch(`${API_BASE}/jobs`, { signal: AbortSignal.timeout(3000) });
+      useRealBackend = r.ok;
+    } catch { useRealBackend = false; }
+    if (useRealBackend && !everLive) {
+      everLive = true;
+      loadServerConfig();
+      restoreJobs();
+    }
+    updateServerBadge();
+    // Check back sooner while the connection is down, so jobs resume showing progress quickly.
+    setTimeout(pingBackend, everLive && !useRealBackend ? 3000 : 8000);
+  }
+
+  function updateServerBadge() {
+    const badge = document.getElementById('serverBadge');
+    const state = useRealBackend ? 'live' : everLive ? 'offline' : 'demo';
+    badge.className = 'server-pill ' + state;
+    badge.innerHTML = `<i class="dot"></i>${{ live: 'Connected', offline: 'Reconnecting…', demo: 'Demo mode' }[state]}`;
+    badge.title = {
+      live:    `Connected to ${API_BASE.replace(/^https?:\/\//, '')} — real video processing`,
+      offline: 'Lost the server — retrying. Jobs keep running on the server, or resume when it restarts.',
+      demo:    'Server not reachable — jobs are simulated. Start it with: npm run server',
+    }[state];
+  }
+
+  async function loadServerConfig() {
+    try {
+      const cfg = await (await fetch(`${API_BASE}/config`)).json();
+      if (cfg.maxUploadBytes > 0) {
+        maxUploadBytes = cfg.maxUploadBytes;
+        document.getElementById('dzSub').textContent = `mp4 · mov · mkv · webm — up to ${fmtLimit(maxUploadBytes)}`;
+      }
+    } catch { /* older server — keep the default */ }
+  }
+
+  // Jobs live on the server: after a page reload, list them again and resume polling running ones.
+  async function restoreJobs() {
+    const orgId = document.getElementById('orgId').value.trim() || 'demo-org';
+    try {
+      const r = await fetch(`${API_BASE}/jobs?orgId=${encodeURIComponent(orgId)}`);
+      if (!r.ok) return;
+      const known = new Set(jobs.map(j => j.id));
+      const added = (await r.json())
+        .filter(d => d?.jobId && !known.has(d.jobId))
+        .map(d => {
+          const job = {
+            id: d.jobId, orgId, _real: true, _upload: !/^https?:\/\//i.test(d.sourceUrl || ''),
+            logs: [], events: [], outputs: [], clipsEmitted: 0, totalDurationSec: 0, currentChunkIndex: 0, _pct: 0,
+          };
+          applyServerState(job, d);
+          return job;
+        });
+      if (!added.length) return;
+      jobs.push(...added);
+      jobs.sort((a, b) => b.startedAt - a.startedAt);
+      renderAll();
+      added.forEach(startPolling);
+    } catch { /* listed again on the next page load */ }
+  }
+
+  pingBackend();
+
+  // ── Start job ─────────────────────────────────────────
+  startBtn.addEventListener('click', async () => {
+    // Lost a server we had — don't quietly fall back to a simulated job.
+    if (everLive && !useRealBackend) return toast('Server unreachable — reconnecting. Is npm run server still running?', 4000);
+    const prompt = promptEl.value.trim();
+    const fromUpload = sourceMode === 'upload';
+    let sourceUrl, sourceName;
+    if (fromUpload) {
+      if (!upload) {
+        toast('Choose a video file to upload');
+        return shake(dropzone, dropzone);
+      }
+      if (upload.status === 'uploading') return toast(`Still uploading — ${Math.round(upload.pct)}%`);
+      if (upload.status === 'error')     return toast(upload.error || 'Upload failed — remove the file and try again', 4000);
+      if (useRealBackend && !upload.uploadId) {
+        // Picked while the server was offline (demo mode) — send it now.
+        setFile(upload.file);
+        return toast('Uploading the file to the server first…');
+      }
+      sourceName = upload.file.name;
+      sourceUrl  = sourceName; // display only — the server resolves uploadId to the file
+    } else {
+      sourceUrl = sourceInput.value.trim();
+      if (!/^https?:\/\/\S+$/i.test(sourceUrl)) {
+        toast('Paste a full video link starting with http(s)://');
+        return shake(sourceInput.closest('.input-group'), sourceInput);
+      }
+    }
+    if (!prompt) return shake(promptEl.closest('.textarea-wrap'), promptEl);
+
+    const orgId = document.getElementById('orgId').value.trim() || 'demo-org';
+    // Clamp to the input's min/max — typed values bypass them.
+    const numField = (id, dflt) => {
+      const el = document.getElementById(id);
+      const v  = parseInt(el.value, 10);
+      if (!Number.isFinite(v) || v === 0) return dflt;
+      const lo = parseInt(el.min, 10), hi = parseInt(el.max, 10);
+      return Math.min(Number.isFinite(hi) ? hi : v, Math.max(Number.isFinite(lo) ? lo : v, v));
+    };
+    const dto = {
+      sourceUrl,
+      prompt,
+      negativePrompt:  document.getElementById('negativePrompt').value.trim() || undefined,
+      aspectRatio:     radioValue('aspectRatio') || '16:9',
+      framing:         radioValue('framing') || 'crop',
+      clipBudget:      numField('clipBudget', 5),
+      chunkLengthSec:  numField('chunkLen', 300),
+      clipOutputSec:   numField('clipOutputSec', 30),
+      fillToTarget:    !document.getElementById('strongOnly').checked,
+    };
+
+    if (useRealBackend) {
+      // ── REAL MODE ─────────────────────────────────────
+      startBtn.disabled = true;
+      startBtn.classList.add('running');
+      try {
+        const body = { orgId, ...dto };
+        if (fromUpload) {
+          delete body.sourceUrl;
+          body.uploadId   = upload.uploadId;
+          body.sourceName = sourceName;
+        }
+        const r   = await fetch(`${API_BASE}/jobs`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+        const { jobId, error } = await r.json();
+        if (!jobId) throw new Error(error ?? 'no jobId returned');
+        const job = {
+          id: jobId, orgId, status: 'queued',
+          sourceUrl, sourceName, prompt, _upload: fromUpload,
+          negativePrompt: dto.negativePrompt,
+          aspectRatio: dto.aspectRatio, framing: dto.framing,
+          clipBudget: dto.clipBudget, chunkLengthSec: dto.chunkLengthSec, clipOutputSec: dto.clipOutputSec,
+          fillToTarget: dto.fillToTarget, phase: 'idle', events: [], errorMessage: undefined,
+          clipsEmitted: 0, totalDurationSec: 0, currentChunkIndex: 0,
+          outputs: [], startedAt: new Date(), endedAt: undefined, logs: [], _pct: 0, _real: true,
+        };
+        jobs.unshift(job);
+        renderAll();
+        revealJobs();
+        startPolling(job);
+      } catch (e) {
+        toast('Failed to start job: ' + e.message, 5000);
+      } finally {
+        startBtn.disabled = false;
+        startBtn.classList.remove('running');
+      }
+    } else {
+      // ── SIMULATION MODE ────────────────────────────────
+      const job = {
+        id: uuid(), orgId, status: 'queued',
+        sourceUrl, sourceName, prompt, _upload: fromUpload,
+        negativePrompt: dto.negativePrompt,
+        aspectRatio: dto.aspectRatio, framing: dto.framing,
+        clipBudget: dto.clipBudget, chunkLengthSec: dto.chunkLengthSec, clipOutputSec: dto.clipOutputSec,
+        fillToTarget: dto.fillToTarget,
+        clipsEmitted: 0, totalDurationSec: 0, currentChunkIndex: 0,
+        outputs: [], startedAt: new Date(), endedAt: undefined, logs: [], _pct: 0,
+      };
+      jobs.unshift(job);
+      renderAll();
+      revealJobs();
+      simulateJob(job);
+    }
+  });
+
+  // On stacked layouts the clip grid (with its processing card) sits below the form — bring it into view.
+  function revealJobs() {
+    if (window.matchMedia('(max-width: 1080px)').matches) {
+      clipGrid.closest('.panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  // ── Real backend polling ──────────────────────────────
+  const activePolls = new Map(); // jobId → intervalId
+
+  // Copies a server job snapshot (GET /jobs or /jobs/:id) onto the local job object.
+  function applyServerState(job, data) {
+    job.status            = data.status;
+    job.totalDurationSec  = data.totalDurationSec ?? job.totalDurationSec;
+    job.currentChunkIndex = data.currentChunkIndex ?? job.currentChunkIndex;
+    job.clipsEmitted      = data.clipsEmitted ?? job.clipsEmitted;
+    ['phase','prompt','negativePrompt','sourceUrl','sourceName','clipBudget','chunkLengthSec','clipOutputSec','aspectRatio','framing','fillToTarget']
+      .forEach(k => { if (data[k] !== undefined && data[k] !== null) job[k] = data[k]; });
+    // Cleared on the server when a job is retried — absent means "none", not "unchanged".
+    job.errorMessage = data.errorMessage;
+    job.downloadPct  = data.downloadPct;
+    job.transcribedChunks = data.transcribedChunks;
+    job.scannedChunks     = data.scannedChunks;
+    if (Array.isArray(data.events)) job.events = data.events;
+    job.outputs = (data.outputs ?? []).map(o => ({
+      ...o,
+      _tags:  Array.isArray(o.tags) ? o.tags : [],
+      _real:  true,
+    }));
+    if (data.startedAt) job.startedAt = new Date(data.startedAt);
+    job.endedAt = data.endedAt ? new Date(data.endedAt) : undefined;
+    job._pct    = progressPct(job);
+  }
+
+  // One poll. Returns true when there is nothing more to poll for.
+  async function pollJob(job) {
+    let r;
+    try { r = await fetch(`${API_BASE}/jobs/${job.id}`); }
+    catch { return false; } // server unreachable — it may be restarting; keep trying
+    if (r.status === 404) {
+      job._gone = true;
+      if (!TERMINAL.includes(job.status)) {
+        job.status       = 'failed';
+        job.endedAt      = new Date();
+        job.errorMessage = 'This job no longer exists on the server. Start it again.';
+        job.logs.push({ msg: '[Server] Job not found on the server.', type: 'error', ts: new Date() });
+      }
+      renderJob(job);
+      return true;
+    }
+    if (!r.ok) return false;
+    let data;
+    try { data = await r.json(); } catch { return false; }
+    applyServerState(job, data);
+    // Server lines only ever append — take the ones not seen yet (a retried step repeats its line).
+    // A shorter list means the server lost them: skip lines already shown instead.
+    const serverLogs = data.serverLogs || [];
+    const seenCount  = job._serverLogCount ?? 0;
+    const shown      = new Set((job.logs || []).map(l => l.msg));
+    const fresh      = seenCount <= serverLogs.length ? serverLogs.slice(seenCount) : serverLogs.filter(m => !shown.has(m));
+    job._serverLogCount = serverLogs.length;
+    const newServerLogs = fresh
+      .map(msg => ({
+        msg,
+        type: msg.includes('[Output]') ? 'ok' : msg.includes('error') || msg.includes('failed') ? 'error' : msg.includes('fallback') || msg.includes('retrying') ? 'warn' : 'info',
+        ts: new Date()
+      }));
+    if (data.status !== job._lastStatus) {
+      newServerLogs.push({ msg: `[Server] Status → ${data.status}`, type: 'info', ts: new Date() });
+    }
+    job.logs = [...(job.logs || []), ...newServerLogs];
+    job._lastStatus = data.status;
+    renderJob(job);
+    return TERMINAL.includes(data.status);
+  }
+
+  function startPolling(job) {
+    if (activePolls.has(job.id)) return;
+    let busy = false; // a slow response must not overlap the next tick
+    const tick = async () => {
+      if (busy) return;
+      busy = true;
+      try {
+        if (await pollJob(job)) {
+          clearInterval(interval);
+          activePolls.delete(job.id);
+        }
+      } finally { busy = false; }
+    };
+    const interval = setInterval(tick, 2000);
+    activePolls.set(job.id, interval);
+    tick();
+  }
+
+  // Runs a failed / stopped job again on the server, keeping the clips it already cut.
+  async function retryJob(id) {
+    const job = jobs.find(j => j.id === id);
+    if (!job || job._retrying) return;
+    job._retrying = true;
+    renderJob(job);
+    try {
+      const r    = await fetch(`${API_BASE}/jobs/${id}/retry`, { method: 'POST' });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      job.status       = 'queued';
+      job.errorMessage = undefined;
+      job.endedAt      = undefined;
+      startPolling(job);
+    } catch (e) {
+      toast(`Could not restart the job: ${e.message}`, 5000);
+    } finally {
+      job._retrying = false;
+      renderJob(job);
+    }
+  }
+
+  function shake(box, focusEl) {
+    box.style.borderColor = 'var(--error)';
+    box.style.boxShadow   = '0 0 0 3px var(--error-soft)';
+    setTimeout(() => { box.style.borderColor = ''; box.style.boxShadow = ''; }, 1400);
+    focusForm(focusEl);
+  }
+
+  // ── Stop job ──────────────────────────────────────────
+  function stopJob(id) {
+    const job = jobs.find(j => j.id === id);
+    if (!job) return;
+    if (['done','failed','stopped'].includes(job.status)) return;
+    if (job._real) {
+      fetch(`${API_BASE}/jobs/${id}/stop`, { method: 'POST' }).catch(() => {});
+    }
+    const iv = activePolls.get(id);
+    if (iv) { clearInterval(iv); activePolls.delete(id); }
+    job.status  = 'stopped';
+    job.endedAt = new Date();
+    job._pct    = progressPct(job);
+    job.logs.push({ msg: '[Stopped] Job stopped by user.', type: 'warn', ts: new Date() });
+    renderJob(job);
+  }
+
+  function deleteJob(id) {
+    const job = jobs.find(j => j.id === id);
+    if (job?._real) fetch(`${API_BASE}/jobs/${id}`, { method: 'DELETE' }).catch(() => {});
+    const iv = activePolls.get(id);
+    if (iv) { clearInterval(iv); activePolls.delete(id); }
+    jobs = jobs.filter(j => j.id !== id);
+    const card = document.getElementById(`card-${id}`);
+    if (card) card.remove();
+    jobsPanel.hidden = jobs.length === 0;
+    renderClips();
+    updateStats();
+  }
+
+  // ── Rendering ────────────────────────────────────────
+  function renderAll() {
+    // Remove cards for jobs no longer in list
+    const ids = new Set(jobs.map(j => j.id));
+    jobListEl.querySelectorAll('.job-card').forEach(c => { if (!ids.has(c.id.replace('card-',''))) c.remove(); });
+    jobsPanel.hidden = jobs.length === 0;
+    jobs.forEach(j => renderJob(j));
+    // New cards are prepended — restored jobs arrive in a batch, so put every card back in jobs[] order.
+    jobs.forEach(j => { const c = document.getElementById(`card-${j.id}`); if (c) jobListEl.appendChild(c); });
+    renderClips();
+    updateStats();
+  }
+
+  // The job card is split into slots so a poll only rebuilds what changed;
+  // its clips live in the shared grid (renderClips) so hover media survives re-renders.
+  function renderJob(job) {
+    if (!jobs.includes(job)) return; // deleted while a poll / simulation step was in flight
+    let card = document.getElementById(`card-${job.id}`);
+    if (!card) {
+      card = document.createElement('article');
+      card.className = 'job-card';
+      card.id = `card-${job.id}`;
+      card.innerHTML = '<div data-slot="top"></div><div data-slot="log"></div><div data-slot="actions"></div>';
+      jobListEl.prepend(card); // jobs[] is newest-first
+    }
+    jobsPanel.hidden = false;
+    const slot = name => card.querySelector(`:scope > [data-slot="${name}"]`);
+
+    const pct = progressPct(job);
+    const fillCls = job.status === 'done' ? 'done' : job.status === 'failed' ? 'failed' : '';
+    const phase = procText(job);
+    const srcKind = job._upload ? 'upload' : detectSourceKind(job.sourceUrl) || 'link';
+
+    slot('top').innerHTML = `
+      <div class="job-header">
+        <div class="job-icon">${SRC_ICONS[srcKind]}</div>
+        <div class="job-meta">
+          <div class="job-source">${escHtml(job.sourceName || shortUrl(job.sourceUrl))}</div>
+          <div class="job-prompt">${escHtml(job.prompt)}${job.negativePrompt ? ` <span class="neg">/ not: ${escHtml(job.negativePrompt)}</span>` : ''}</div>
+          <div class="job-tags">
+            <span class="chip">${escHtml(job.aspectRatio)}${job.framing === 'blur' ? ' fit' : ''}</span>
+            <span class="chip">~${job.clipOutputSec}s</span>
+            <span class="chip">${job.clipBudget} clips</span>
+            ${job.fillToTarget === false ? '<span class="chip">strong only</span>' : ''}
+            <span class="chip">chunk ${job.chunkLengthSec}s</span>
+            ${job.totalDurationSec ? `<span class="chip">${fmtTime(job.totalDurationSec)}</span>` : ''}
+            <span class="chip">${fmtDur(job.startedAt, job.endedAt)}</span>
+          </div>
+        </div>
+        <span class="status-badge status-${escHtml(job.status)}">${escHtml(job.status)}</span>
+      </div>
+
+      <div class="job-progress">
+        <div class="progress-track"><div class="progress-fill ${fillCls}" style="width:${pct}%"></div></div>
+        <span class="progress-label">${Math.round(pct)}% · ${job.clipsEmitted}/${job.clipBudget} clips</span>
+      </div>
+      ${phase ? `<div class="job-phase">${escHtml(phase)}</div>` : ''}
+      ${shortfallNotice(job)}
+    `;
+
+    renderLog(slot('log'), job);
+
+    const actionsSlot = slot('actions');
+    const canRetry    = job._real && !job._gone && ['failed','stopped'].includes(job.status) && job.clipsEmitted < job.clipBudget;
+    const actionsSig  = `${job.status}|${job.clipsEmitted}|${canRetry}|${!!job._retrying}`;
+    if (actionsSlot.dataset.sig !== actionsSig) {
+      actionsSlot.dataset.sig = actionsSig;
+      actionsSlot.innerHTML = `
+        <div class="job-actions">
+          ${!TERMINAL.includes(job.status)
+            ? `<button class="btn-sm" onclick="stopJob('${job.id}')">
+                 <svg class="ico fill" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+                 Stop
+               </button>`
+            : ''
+          }
+          ${canRetry
+            ? `<button class="btn-sm" onclick="retryJob('${job.id}')" ${job._retrying ? 'disabled' : ''}
+                       title="Run it again — clips already cut are kept and finished chunks aren't transcribed again">
+                 <svg class="ico" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/></svg>
+                 ${job._retrying ? 'Starting…' : job.status === 'stopped' ? 'Resume' : 'Retry'}
+               </button>`
+            : ''
+          }
+          <button class="btn-sm danger" onclick="deleteJob('${job.id}')">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+            Delete
+          </button>
+          ${job.clipsEmitted > 0
+            ? `<span class="job-ready">${job.clipsEmitted} clip${job.clipsEmitted > 1 ? 's' : ''} ready</span>`
+            : ''
+          }
+        </div>
+      `;
+    }
+
+    renderClips();
+    updateStats();
+  }
+
+  // ── Clip tiles ───────────────────────────────────────
+  // Per-segment encoding so '#', '?' or spaces in a file name can't truncate the URL.
+  function mediaUrl(p) {
+    if (!p) return '';
+    p = String(p);
+    if (/^https?:\/\//i.test(p)) return p;
+    const path = p.replace(/\\/g, '/').split('/').filter(Boolean).map(seg => {
+      try { seg = decodeURIComponent(seg); } catch { /* already raw */ }
+      return encodeURIComponent(seg);
+    }).join('/');
+    return API_BASE + '/' + path;
+  }
+
+  function fileName(p) {
+    return String(p || '').split(/[\\/]/).pop() || 'clip';
+  }
+
+  // What a real tile plays on hover: the clip itself, muted and looping.
+  function hoverMediaFor(o) {
+    if (!o._real || !o.outputPath) return null;
+    return { src: mediaUrl(o.outputPath) };
+  }
+
+  // Only real outputs have a file behind them.
+  function downloadInfo(o) {
+    if (!o || !o._real || !o.outputPath) return null;
+    return { href: mediaUrl(o.outputPath), name: fileName(o.outputPath) };
+  }
+
+  function triggerDownload(info) {
+    const a = document.createElement('a');
+    a.href = info.href;
+    a.download = info.name;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  function clipSig(o, job) {
+    return [o.id, o.clipNo, o.caption, o.matchScore, o.startSec, o.endSec, o.durationSec,
+            o.outputPath, o.thumbPath, o.bestAvailable ? 1 : 0, job.aspectRatio].join('|');
+  }
+
+  function scoreClass(score) {
+    return score >= 0.85 ? 'hi' : score >= 0.7 ? 'mid' : 'lo';
+  }
+
+  /** A strong, real prompt match — shown under "Top matches". */
+  const TOP_MATCH = 0.75;
+
+  function createClipTile(o, job, sig) {
+    const hover = hoverMediaFor(o);
+    const id    = String(o.id);
+    const score = Number(o.matchScore ?? 0);
+    const tile  = document.createElement('article');
+    tile.className = 'clip-card' + (hover ? ' has-media' : '') + (selected.has(id) ? ' selected' : '');
+    tile.dataset.key    = 'clip-' + id;
+    tile.dataset.clipId = id;
+    tile.dataset.kind   = 'clips';
+    tile.dataset.top    = !o.bestAvailable && score >= TOP_MATCH ? '1' : '0';
+    tile.dataset.sig    = sig;
+    if (hover) tile.dataset.hoverSrc = hover.src;
+
+    tile.dataset.ar     = job.aspectRatio || '16:9';
+
+    const caption = o.caption || `Clip #${o.clipNo}`;
+    const thumb = o._real && o.thumbPath
+      ? `<img class="clip-thumb-img" src="${escHtml(mediaUrl(o.thumbPath))}" loading="lazy" decoding="async" alt="">`
+      : '';
+    const dl    = downloadInfo(o);
+    const dlIco = '<svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>';
+    tile.innerHTML = `
+        <label class="clip-check" title="Select clip">
+          <input type="checkbox" data-action="select" aria-label="Select ${escHtml(caption)}" ${selected.has(id) ? 'checked' : ''}>
+          <span class="check-box"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+        </label>
+        <div class="clip-thumb" data-action="preview" role="button" tabindex="0" aria-label="Preview ${escHtml(caption)}">
+          <canvas class="clip-thumb-canvas" width="320" height="180" data-no="${escHtml(o.clipNo)}"></canvas>
+          ${thumb}
+          <span class="thumb-shade"></span>
+          ${o.bestAvailable ? '<span class="clip-best" title="Not a strong match for the prompt — cut to reach the requested number of clips">Best available</span>' : ''}
+          <span class="badge-time">${fmtClock(o.durationSec)}</span>
+          <span class="play-btn"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg></span>
+        </div>
+        <div class="clip-body">
+          <div class="clip-text">
+            <h3 class="clip-caption" title="${escHtml(caption)}">${escHtml(caption)}</h3>
+            <div class="clip-meta">
+              <span class="score-pill ${scoreClass(score)}" title="Match score">${Math.round(score * 100)}%</span>
+              <span title="Position in the source video">${fmtTime(o.startSec)}–${fmtTime(o.endSec)}</span><i>·</i><span${o.width ? ` title="${o.width}×${o.height}"` : ''}>${escHtml(job.aspectRatio || '16:9')}</span>
+            </div>
+          </div>
+          <div class="clip-actions">
+            ${dl
+              ? `<a class="icon-btn" data-action="download" href="${escHtml(dl.href)}" download="${escHtml(dl.name)}" target="_blank" rel="noopener" title="Download" aria-label="Download ${escHtml(caption)}">${dlIco}</a>`
+              : `<button type="button" class="icon-btn" disabled title="Demo clip — no file to download" aria-label="Download unavailable for demo clips">${dlIco}</button>`}
+            <button type="button" class="icon-btn" data-action="more" title="More" aria-label="More actions" aria-haspopup="menu" aria-expanded="false">
+              <svg class="ico fill" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>
+            </button>
+          </div>
+        </div>
+    `;
+    // Broken/missing thumbnail → fall back to the canvas placeholder underneath.
+    const img = tile.querySelector('.clip-thumb-img');
+    if (img) img.addEventListener('error', () => img.remove());
+    if (hover) {
+      tile.addEventListener('mouseenter', () => startHoverPreview(tile));
+      tile.addEventListener('mouseleave', () => stopHoverPreview(tile));
+    }
+    return tile;
+  }
+
+  // Placeholder card shown in the grid while a job is still scanning / rendering.
+  function createProcessingCard(job) {
+    const el = document.createElement('article');
+    el.className = 'clip-card processing';
+    el.dataset.key  = 'proc-' + job.id;
+    el.dataset.kind = 'processing';
+    el.innerHTML = `
+      <div class="clip-thumb proc-thumb">
+        <div class="proc-ring"><span class="proc-pct">0%</span></div>
+      </div>
+      <div class="clip-body">
+        <div class="clip-text">
+          <h3 class="clip-caption proc-title"></h3>
+          <div class="clip-meta proc-meta"></div>
+          <div class="progress-track sm"><div class="progress-fill"></div></div>
+          <button type="button" class="btn-text" data-action="job" data-job-id="${escHtml(job.id)}">
+            View activity
+            <svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>`;
+    return el;
+  }
+
+  function updateProcessingCard(el, job) {
+    const pct  = Math.round(progressPct(job));
+    const ring = el.querySelector('.proc-ring');
+    ring.classList.toggle('spin', pct <= 0);
+    ring.style.setProperty('--p', pct);
+    el.querySelector('.proc-pct').textContent = pct > 0 ? `${pct}%` : '';
+    const title = procText(job) || 'Processing…';
+    const titleEl = el.querySelector('.proc-title');
+    titleEl.textContent = title;
+    titleEl.title = title;
+    el.querySelector('.proc-meta').textContent =
+      `${job.aspectRatio} · ~${job.clipOutputSec}s · ${job.clipsEmitted}/${job.clipBudget} clips`;
+    el.querySelector('.progress-fill').style.width = pct + '%';
+  }
+
+  const hoverCapable = window.matchMedia ? window.matchMedia('(hover: hover)') : null;
+
+  // Media is created on first hover only, so a grid of 100 tiles downloads just thumbnails.
+  function startHoverPreview(tile) {
+    if (hoverCapable && !hoverCapable.matches) return;
+    tile.classList.add('hovering');
+    let m = tile.querySelector('.clip-hover-media');
+    if (!m) {
+      const thumbEl = tile.querySelector('.clip-thumb');
+      m = document.createElement('video');
+      m.className = 'clip-hover-media';
+      m.muted = true;
+      m.loop = true;
+      m.playsInline = true;
+      m.preload = 'none';
+      m.setAttribute('muted', '');
+      m.setAttribute('playsinline', '');
+      m.addEventListener('playing', () => m.classList.add('ready'));
+      m.addEventListener('error',   () => m.remove());
+      m.src = tile.dataset.hoverSrc;
+      // Below the badges so duration / format / best-available stay visible.
+      thumbEl.insertBefore(m, thumbEl.querySelector('.thumb-shade'));
+    }
+    const p = m.play();
+    if (p && typeof p.catch === 'function') p.catch(() => {});
+  }
+
+  function stopHoverPreview(tile) {
+    tile.classList.remove('hovering');
+    const v = tile.querySelector('video.clip-hover-media');
+    if (v) v.pause();
+  }
+
+  function listedOutputs() {
+    const list = [];
+    jobs.forEach(job => job.outputs.forEach(o => {
+      if (!removedClips.has(String(o.id))) list.push({ o, job });
+    }));
+    return list;
+  }
+
+  // Keyed reconcile over every job: running jobs first (as processing cards), then clips
+  // newest job first. Existing tiles are kept (no reload/flicker); the "more" card stays last.
+  function renderClips() {
+    const existing = new Map([...clipGrid.querySelectorAll(':scope > [data-key]')].map(el => [el.dataset.key, el]));
+    const order = [];
+
+    jobs.filter(j => !TERMINAL.includes(j.status)).forEach(job => {
+      const el = existing.get('proc-' + job.id) || createProcessingCard(job);
+      updateProcessingCard(el, job);
+      order.push(el);
+    });
+
+    const listed = new Set();
+    listedOutputs().forEach(({ o, job }) => {
+      const sig = clipSig(o, job);
+      let tile = existing.get('clip-' + o.id);
+      if (tile && tile.dataset.sig !== sig) { tile.remove(); tile = null; }
+      if (!tile) tile = createClipTile(o, job, sig);
+      listed.add(String(o.id));
+      order.push(tile);
+    });
+
+    order.forEach((el, i) => {
+      if (clipGrid.children[i] !== el) clipGrid.insertBefore(el, clipGrid.children[i] ?? moreCard);
+    });
+    const keep = new Set(order);
+    clipGrid.querySelectorAll(':scope > [data-key]').forEach(el => { if (!keep.has(el)) el.remove(); });
+    [...selected].forEach(id => { if (!listed.has(id)) selected.delete(id); });
+
+    applyFilter();
+    requestAnimationFrame(paintCanvases);
+  }
+
+  const EMPTY_COPY = {
+    none:       ['No clips yet',        'Add a video link or file, describe the moments to look for, then generate. Each match is cut into its own clip and lands here.'],
+    all:        ['No clips yet',        'Nothing came out of these jobs — open a job’s activity below to see why.'],
+    top:        ['No top matches yet',  'Clips that strongly match your prompt (75%+) show up here — check All for best-available ones.'],
+    processing: ['Nothing processing',  'Running jobs show up here while they scan and render.'],
+  };
+
+  function applyFilter() {
+    const counts = { clips: 0, top: 0, processing: 0 };
+    let shown = 0;
+    clipGrid.querySelectorAll(':scope > [data-key]').forEach(el => {
+      const kind  = el.dataset.kind;
+      const isTop = el.dataset.top === '1';
+      counts[kind] = (counts[kind] || 0) + 1;
+      if (isTop) counts.top++;
+      const show = clipFilter === 'all' || clipFilter === kind || (clipFilter === 'top' && isTop);
+      el.hidden = !show;
+      if (show) shown++;
+    });
+    counts.all = counts.clips;
+
+    document.querySelectorAll('[data-filter]').forEach(b => {
+      const on = b.dataset.filter === clipFilter;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', String(on));
+      b.querySelector('.n').textContent = counts[b.dataset.filter] || 0;
+    });
+    statClipsEl.textContent = `${counts.all} clip${counts.all === 1 ? '' : 's'}`;
+
+    const empty = shown === 0;
+    clipGrid.hidden   = empty;
+    emptyState.hidden = !empty;
+    moreCard.hidden   = clipFilter === 'processing';
+    if (empty) {
+      const [title, text] = EMPTY_COPY[jobs.length ? clipFilter : 'none'];
+      emptyTitle.textContent = title;
+      emptyText.textContent  = text;
+    }
+    syncSelectionUi();
+  }
+
+  document.querySelectorAll('[data-filter]').forEach(b => b.addEventListener('click', () => {
+    clipFilter = b.dataset.filter;
+    applyFilter();
+  }));
+
+  // ── Selection + bulk actions ─────────────────────────
+  function visibleClipCards() {
+    return [...clipGrid.querySelectorAll(':scope > [data-clip-id]')].filter(el => !el.hidden);
+  }
+
+  function setSelected(id, on) {
+    id = String(id);
+    if (on) selected.add(id); else selected.delete(id);
+    const card = clipGrid.querySelector(`:scope > [data-key="clip-${CSS.escape(id)}"]`);
+    if (!card) return;
+    card.classList.toggle('selected', on);
+    const cb = card.querySelector('input[data-action="select"]');
+    if (cb) cb.checked = on;
+  }
+
+  function syncSelectionUi() {
+    const vis  = visibleClipCards();
+    const nSel = vis.filter(el => selected.has(el.dataset.clipId)).length;
+    selectAllEl.checked       = vis.length > 0 && nSel === vis.length;
+    selectAllEl.indeterminate = nSel > 0 && nSel < vis.length;
+    selectAllEl.disabled      = vis.length === 0;
+    downloadAllLabel.textContent = selected.size ? `Download (${selected.size})` : 'Download all';
+    downloadAllBtn.disabled   = vis.length === 0 && selected.size === 0;
+    removeSelBtn.disabled     = selected.size === 0;
+    clipGrid.classList.toggle('has-selection', selected.size > 0);
+  }
+
+  selectAllEl.addEventListener('change', () => {
+    const on = selectAllEl.checked;
+    visibleClipCards().forEach(el => setSelected(el.dataset.clipId, on));
+    syncSelectionUi();
+  });
+
+  downloadAllBtn.addEventListener('click', () => {
+    const ids   = selected.size ? [...selected] : visibleClipCards().map(el => el.dataset.clipId);
+    const infos = ids.map(id => downloadInfo(findOutput(id))).filter(Boolean);
+    if (!infos.length) {
+      return toast(ids.length ? 'Demo clips have no files — run npm run server for real output' : 'No clips to download');
+    }
+    // Staggered so the browser doesn't drop all but the first.
+    infos.forEach((info, i) => setTimeout(() => triggerDownload(info), i * 350));
+    toast(`Downloading ${infos.length} file${infos.length > 1 ? 's' : ''}…`);
+  });
+
+  removeSelBtn.addEventListener('click', () => {
+    const n = selected.size;
+    if (!n) return;
+    selected.forEach(id => removedClips.add(id));
+    selected.clear();
+    renderClips();
+    toast(`Removed ${n} clip${n > 1 ? 's' : ''} from the list`);
+  });
+
+  function showJob(jobId) {
+    const card = document.getElementById(`card-${jobId}`);
+    if (!card) return;
+    const log = card.querySelector('.log-panel');
+    if (log) log.open = true;
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.add('flash');
+    setTimeout(() => card.classList.remove('flash'), 1400);
+  }
+
+  // ── Clip "more" menu ─────────────────────────────────
+  const menuEl = document.getElementById('clipMenu');
+  let menuClipId = null;
+  let menuAnchor = null;
+
+  function openMenu(btn, clipId) {
+    if (menuClipId === clipId && !menuEl.hidden) return closeMenu();
+    closeMenu();
+    const o = findOutput(clipId);
+    if (!o) return;
+    menuClipId = clipId;
+    menuAnchor = btn;
+    const real = !!downloadInfo(o);
+    menuEl.querySelector('[data-menu="open"]').disabled = !real;
+    menuEl.querySelector('[data-menu="copy"]').disabled = !real;
+    menuEl.hidden = false;
+    btn.setAttribute('aria-expanded', 'true');
+
+    const r  = btn.getBoundingClientRect();
+    const mw = menuEl.offsetWidth, mh = menuEl.offsetHeight;
+    const left = Math.max(8, Math.min(r.right - mw, window.innerWidth - mw - 8));
+    let top = r.bottom + 6;
+    if (top + mh > window.innerHeight - 8) top = r.top - mh - 6;
+    menuEl.style.left = left + 'px';
+    menuEl.style.top  = Math.max(8, top) + 'px';
+    menuEl.querySelector('button:not(:disabled):not([hidden])')?.focus();
+  }
+
+  function closeMenu() {
+    if (menuEl.hidden) return;
+    menuEl.hidden = true;
+    menuAnchor?.setAttribute('aria-expanded', 'false');
+    menuClipId = null;
+    menuAnchor = null;
+  }
+
+  menuEl.addEventListener('click', async e => {
+    const item = e.target.closest('[data-menu]');
+    if (!item || item.disabled) return;
+    const id = menuClipId, anchor = menuAnchor;
+    const o  = findOutput(id);
+    closeMenu();
+    if (!o) return;
+    switch (item.dataset.menu) {
+      case 'details':
+        openClipModal(id);
+        return;
+      case 'open':
+        window.open(mediaUrl(o.outputPath), '_blank', 'noopener');
+        break;
+      case 'copy':
+        try { await navigator.clipboard.writeText(mediaUrl(o.outputPath)); toast('Link copied'); }
+        catch { toast('Could not copy the link'); }
+        break;
+      case 'remove':
+        removedClips.add(String(id));
+        selected.delete(String(id));
+        renderClips();
+        toast('Removed from the list');
+        return;
+    }
+    anchor?.focus();
+  });
+  document.addEventListener('click', e => {
+    if (!menuEl.hidden && !menuEl.contains(e.target) && !e.target.closest('[data-action="more"]')) closeMenu();
+  });
+  window.addEventListener('resize', closeMenu);
+  document.addEventListener('scroll', e => { if (!menuEl.contains(e.target)) closeMenu(); }, true);
+
+  // ── Grid interactions (delegated — survives re-renders) ──
+  clipGrid.addEventListener('click', e => {
+    const actEl = e.target.closest('[data-action]');
+    if (!actEl || !clipGrid.contains(actEl)) return;
+    const card = actEl.closest('[data-key]');
+    switch (actEl.dataset.action) {
+      case 'preview': openClipModal(card.dataset.clipId); break;
+      case 'more':    e.stopPropagation(); openMenu(actEl, card.dataset.clipId); break;
+      case 'job':     showJob(actEl.dataset.jobId); break;
+    }
+  });
+  clipGrid.addEventListener('change', e => {
+    const cb = e.target.closest('input[data-action="select"]');
+    if (!cb) return;
+    setSelected(cb.closest('[data-clip-id]').dataset.clipId, cb.checked);
+    syncSelectionUi();
+  });
+  clipGrid.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const thumb = e.target.closest?.('.clip-thumb[data-action="preview"]');
+    if (!thumb || thumb !== e.target) return;
+    e.preventDefault();
+    openClipModal(thumb.closest('[data-clip-id]').dataset.clipId);
+  });
+
+  // ── Activity log ─────────────────────────────────────
+  // Built once per job so the open/closed state survives polls; only the lines are replaced.
+  function renderLog(slotEl, job) {
+    const sig = String(job.logs.length);
+    if (slotEl.dataset.sig === sig) return;
+    slotEl.dataset.sig = sig;
+    if (!job.logs.length) { slotEl.innerHTML = ''; return; }
+    let panel = slotEl.querySelector('.log-panel');
+    if (!panel) {
+      slotEl.innerHTML = `
+        <details class="log-panel">
+          <summary class="log-header">
+            <svg class="ico chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+            Activity
+            <span class="log-last"></span>
+            <span class="log-count"></span>
+          </summary>
+          <div class="log-body" id="log-${job.id}"></div>
+        </details>
+      `;
+      panel = slotEl.querySelector('.log-panel');
+    }
+    const body = panel.querySelector('.log-body');
+    // Follow new lines only if the user hasn't scrolled up to read older ones.
+    const stick   = body.scrollTop + body.clientHeight >= body.scrollHeight - 8;
+    const prevTop = body.scrollTop;
+    body.innerHTML = job.logs.slice(-30).map(l =>
+      `<span class="log-line ${l.type}">${escHtml(l.msg)}</span>`
+    ).join('');
+    panel.querySelector('.log-last').textContent  = job.logs[job.logs.length - 1].msg;
+    panel.querySelector('.log-count').textContent = `${job.logs.length} line${job.logs.length > 1 ? 's' : ''}`;
+    body.scrollTop = stick ? body.scrollHeight : prevTop;
+  }
+
+  // ── Canvas thumbnails ─────────────────────────────────
+  // Demo clips have no frame to show: draw the source waveform with the cut window lit, like a timeline selection.
+  function drawPlaceholder(canvas, no) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    const rng  = seededRng(no * 7919);
+    const bars = Math.round(w / 6);
+    const bw   = w / bars;
+    const from = Math.floor(bars * (0.12 + rng() * 0.5));
+    const to   = Math.min(bars, from + Math.floor(bars * (0.16 + rng() * 0.14)));
+
+    ctx.fillStyle = '#121216';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(182,255,46,0.07)';
+    ctx.fillRect(from * bw, 0, (to - from) * bw, h);
+    ctx.fillStyle = 'rgba(182,255,46,0.55)';
+    ctx.fillRect(from * bw, 0, 1, h);
+    ctx.fillRect(to * bw - 1, 0, 1, h);
+
+    for (let i = 0; i < bars; i++) {
+      const bh = h * (0.08 + rng() * 0.4);
+      ctx.fillStyle = i >= from && i < to ? '#B6FF2E' : 'rgba(255,255,255,0.16)';
+      ctx.fillRect(i * bw + bw * 0.3, (h - bh) / 2, Math.max(1, bw * 0.4), bh);
+    }
+  }
+
+  function paintCanvases() {
+    clipGrid.querySelectorAll('canvas[data-no]:not([data-painted])').forEach(c => {
+      c.dataset.painted = '1';
+      drawPlaceholder(c, parseInt(c.dataset.no, 10) || 1);
+    });
+  }
+
+  function seededRng(seed) {
+    let s = seed >>> 0;
+    return () => { s = (s ^ (s << 13)) >>> 0; s = (s ^ (s >> 7)) >>> 0; s = (s ^ (s << 17)) >>> 0; return (s >>> 0) / 4294967296; };
+  }
+
+  // ── Stats ─────────────────────────────────────────────
+  function updateStats() {
+    statJobsEl.textContent    = jobs.length;
+    statRunningEl.textContent = jobs.filter(j => !['done','failed','stopped'].includes(j.status)).length;
+  }
+
+  // ── Escape ────────────────────────────────────────────
+  function escHtml(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Clip detail modal ────────────────────────────────
+  const modalBackdrop = document.getElementById('modalBackdrop');
+  const modalCanvas   = document.getElementById('modalCanvas');
+  const modalClose    = document.getElementById('modalClose');
+  const modalMedia    = document.getElementById('modalMedia');
+  const modalOverlay  = document.getElementById('modalOverlay');
+  const modalPathShortEl = document.getElementById('modalPathShort');
+  const modalNote     = document.getElementById('modalNote');
+  const modalLinks    = document.getElementById('modalLinks');
+  let modalReturnFocus = null;
+
+  function findOutput(id) {
+    return jobs.flatMap(j => j.outputs).find(o => String(o.id) === String(id));
+  }
+
+  function stopModalMedia() {
+    modalMedia.querySelectorAll('video').forEach(v => {
+      v.pause();
+      v.removeAttribute('src');
+      v.load();
+    });
+    modalMedia.innerHTML = '';
+    modalMedia.hidden = true;
+  }
+
+  function openClipModal(outputId) {
+    const output = findOutput(outputId);
+    if (!output) return;
+    stopModalMedia();
+
+    const outPath = output.outputPath || '';
+    const score   = Number(output.matchScore ?? 0);
+    document.getElementById('modalCaption').textContent  = output.caption || `Clip #${output.clipNo}`;
+    document.getElementById('modalStart').textContent    = fmtTime(output.startSec) + ' – ' + fmtTime(output.endSec);
+    document.getElementById('modalDur').textContent      = fmtTime(output.durationSec);
+    document.getElementById('modalScore').textContent    = (score * 100).toFixed(0) + '%';
+    modalPathShortEl.textContent = fileName(outPath);
+    document.getElementById('modalPathFull').textContent  = outPath;
+
+    const tagsEl = document.getElementById('modalTags');
+    tagsEl.innerHTML = (output._tags || output.tags || []).map(t =>
+      `<span class="chip">${escHtml(t)}</span>`
+    ).join('');
+
+    modalNote.hidden = !output.bestAvailable;
+    modalNote.textContent = output.bestAvailable
+      ? 'Best available — not a strong match for your prompt. It was cut to reach the number of clips you asked for.'
+      : '';
+
+    if (output._real) {
+      // ── Real output: play the actual clip ────────────
+      const src = mediaUrl(outPath);
+      const el  = document.createElement('video');
+      el.controls = true;
+      el.autoplay = true;
+      el.muted = true;
+      el.loop = true;
+      el.playsInline = true;
+      el.setAttribute('muted', '');
+      el.setAttribute('playsinline', '');
+      if (output.thumbPath) el.poster = mediaUrl(output.thumbPath);
+      el.src = src;
+      modalMedia.appendChild(el);
+      modalMedia.hidden = false;
+      modalCanvas.hidden = true;
+      modalOverlay.hidden = true;
+      modalPathShortEl.hidden = true;
+
+      const links = [];
+      if (src) {
+        links.push(`<a class="btn-link primary" href="${escHtml(src)}" download="${escHtml(fileName(outPath))}" target="_blank" rel="noopener">Download</a>`);
+      }
+      modalLinks.innerHTML = links.join('');
+    } else {
+      // ── Simulation: draw the placeholder canvas ──────
+      modalCanvas.hidden = false;
+      modalOverlay.hidden = false;
+      modalPathShortEl.hidden = false;
+      modalLinks.innerHTML = '';
+      drawModalCanvas(output);
+    }
+
+    modalReturnFocus = document.activeElement;
+    modalBackdrop.hidden = false;
+    document.body.style.overflow = 'hidden';
+    modalClose.focus();
+  }
+
+  function drawModalCanvas(output) {
+    drawPlaceholder(modalCanvas, output.clipNo);
+  }
+
+  function closeModal() {
+    stopModalMedia();
+    modalLinks.innerHTML = '';
+    modalBackdrop.hidden = true;
+    document.body.style.overflow = '';
+    if (modalReturnFocus && typeof modalReturnFocus.focus === 'function' && document.contains(modalReturnFocus)) {
+      modalReturnFocus.focus();
+    }
+    modalReturnFocus = null;
+  }
+
+  modalClose.addEventListener('click', closeModal);
+  modalBackdrop.addEventListener('click', e => { if (e.target === modalBackdrop) closeModal(); });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (!menuEl.hidden) { const a = menuAnchor; closeMenu(); a?.focus(); return; }
+    if (!modalBackdrop.hidden) closeModal();
+  });
+
+  // Ctrl/⌘+Enter starts a job from anywhere on the page.
+  const isMac = /Mac|iP(hone|ad|od)/.test(navigator.platform || navigator.userAgent);
+  document.getElementById('genKbd').textContent = isMac ? '⌘ ↵' : 'Ctrl ↵';
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || !(e.metaKey || e.ctrlKey)) return;
+    if (startBtn.disabled || !modalBackdrop.hidden) return;
+    e.preventDefault();
+    startBtn.click();
+  });
+
+  // ── Expose for inline onclick ─────────────────────────
+  window.stopJob       = stopJob;
+  window.retryJob      = retryJob;
+  window.deleteJob     = deleteJob;
+  window.openClipModal = openClipModal;
+
+  renderAll();
+})();
+</script>
